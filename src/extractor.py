@@ -36,14 +36,15 @@ class _Block(object):
     def _get_reduced_text(self):
         # return text removed link text
         dom = copy.deepcopy(self.dom)
-        
+        a_list = dom.xpath('//a')
+        a_count = len(a_list)
         try:
-            for a in dom.xpath('//a'):
+            for a in a_list:
                 a.drop_tree()
         except AssertionError:
             pass
         # at least link-removed content has to have 20 charactors.
-        if len(dom.text_content()) < 20:
+        if len(dom.text_content()) < 20 * a_count:
             return ""
         if self.has_link_list():
             return ""

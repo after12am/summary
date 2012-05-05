@@ -2,7 +2,7 @@
 
 A python script extracting main content from web page. still not work in japanese site.
 
-<h1>Copyright of the original implementation</h1>
+<h3>Copyright of the original implementation</h3>
 
 Copyright © 2007/2008 Nakatani Shuyo / Cybozu Labs Inc. All rights reserved.
 

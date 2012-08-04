@@ -111,6 +111,7 @@ def _analyse(blocks):
     continuous = 1.0
     body = ''
     score = 0
+    html = ''
     candidate = []
     # calculate score
     for b in blocks:
@@ -123,14 +124,16 @@ def _analyse(blocks):
         b.calculate_score(factor, continuous)
         if b.score1 > threshold:
             body += b.text
+            html += b.html
             score += b.score1
             continuous = continuous_factor
         elif b.score > threshold:
-            candidate.append({ 'body': body, 'score': score })
+            candidate.append({ 'body': body, 'score': score, 'html': html })
             body = b.text
+            html = b.html
             score = b.score
             continuous = continuous_factor
-    candidate.append({ 'body': body, 'score': score })
+    candidate.append({ 'body': body, 'score': score, 'html': html })
     return candidate
 
 # we expect you to override in response to necessary.
@@ -146,14 +149,22 @@ def extract(doc):
     doc = _from_document(_cleanup_document(doc))
     blocks = _candidate(doc)
     # sort by score
-    candidate = { 'body': None, 'score': 0 }
+    candidate = { 'body': None, 'score': 0, 'html': None }
     for b in _analyse(blocks):
         if candidate['score'] < b['score']:
             candidate = b
     return candidate
 
+def extract_img(doc):
+    b = extract(doc)
+    img_candidate = lxml.html.fromstring(b['html'])
+    candidate = []
+    for e in img_candidate.xpath('//img'):
+        candidate.append({'src': e.get('src'), 'alt': e.get('alt'), 'width': e.get('width'), 'height': e.get('height')});
+    return candidate
+
 def main():
-    print extract('''
+    doc = '''
     <!DOCTYPE HTML>
     <html lang="en">
     <head>
@@ -162,6 +173,7 @@ def main():
     </head>
     <body>
         <div>
+            <img src="sample.jpeg"/>
             These portable speakers are made from laser-cut wood, fabric, veneer, and electronics. They are powered by three AAA batteries and compatible with any standard audio jack (e.g. on an iPhone, iPod, or laptop).
             <p>The speakers are an experiment in open-source hardware applied to consumer electronics. By making their original design files freely available online, in a way that's easy for others to modify, I hope to encourage people to make and modify them. In particular, I'd love to see changes or additions that I didn't think about and to have those changes shared publicly for others to use or continue to modify. The speakers have been designed to be relatively simple and cheap in the hopes of facilitating their production by others.</p>
         </div>
@@ -170,6 +182,8 @@ def main():
         <div>Use 6mm (1/4") plywood. For the veneer, 1 9/16" edging backed with an iron-on adhesive is ideal (like this one from Rockler), but anything should work if you cut it to that width. Pick whatever fabric you like. For the electronic components, see the bill-of-materials above. You'll also need two-conductor speaker wire, available at Radio Shack.</div>
     </body>
     </html>
-    ''')
+    '''
+    print extract(doc)
+    print extract_img(doc)
 
 if __name__ == '__main__': main()

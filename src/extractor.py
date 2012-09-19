@@ -6,41 +6,122 @@ from lxml.etree import ParserError
 import copy
 from charset import force_unicode, htmlentity2unicode
 
-threshold = 100
-min_length = 80
-decay_factor = 0.73
-continuous_factor = 1.62
+script_regx = re.compile('<script.*?/script>', re.DOTALL)
+noscript_regx = re.compile('<noscript.*?/noscript>', re.DOTALL)
+style_regx = re.compile('<style.*?/style>', re.DOTALL)
+iframe_regx = re.compile('<iframe.*?/iframe>', re.DOTALL)
+select_regx = re.compile('<select.*?/select>', re.DOTALL)
+comment_regx = re.compile('<!--.*?-->', re.DOTALL)
 
-# compile regression
-SCRIPT_REGX = re.compile('<script.*?/script>', re.DOTALL)
-NOSCRIPT_REGX = re.compile('<noscript.*?/noscript>', re.DOTALL)
-STYLE_REGX = re.compile('<style.*?/style>', re.DOTALL)
-IFRAME_REGX = re.compile('<iframe.*?/iframe>', re.DOTALL)
-SELECT_REGX = re.compile('<select.*?/select>', re.DOTALL)
-COMMENT_REGX = re.compile('<!--.*?-->', re.DOTALL)
+class _HTML(object):
+    
+    def __init__(self, document):
+        self.threshold = 100
+        self.min_length = 80
+        self.continuous_factor = 1.62
+        self.document = self.clean(force_unicode(document))
+    
+    def clean(self, document):
+        # remove unnecessary tags from document
+        document = htmlentity2unicode(document)
+        # remove ignore tags
+        document = script_regx.sub('', document)
+        document = noscript_regx.sub('', document)
+        document = style_regx.sub('', document)
+        document = iframe_regx.sub('', document)
+        document = select_regx.sub('', document)
+        document = comment_regx.sub('', document)
+        return document
+    
+    def extract(self):
+        # extract main content from document
+        dom = lxml.html.fromstring(self.document)
+        blocks = self.divide_into_blocks(dom)
+        # sort by score
+        candidate = { 'body': None, 'score': 0, 'html': None }
+        for b in self.analyse(blocks):
+            if candidate['score'] < b['score']:
+                candidate = b
+        return candidate
+    
+    def divide_into_blocks(self, dom):
+        # divide into layout blocks
+        result = []
+        content = ''
+        for e in list(dom.xpath('body')[0]):
+            content += lxml.html.tostring(e)
+        # extract div content
+        match = re.compile('<div.*?>|</div>|<h.>|</h.>', re.DOTALL).split(content);
+        for m in match:
+            # ignore content has only white spaces
+            if len(re.compile('\s').sub('', m)) > 0:
+                try:
+                    b = _Block(m)
+                except ParserError:
+                    result.append(_Empty())
+                else:
+                    result.append(b)
+            else:
+                # we can not ignore empty block
+                # has to influence distance of layout block
+                result.append(_Empty())
+        return result
+    
+    def analyse(self, blocks):
+        # score each layout block and sort by their score
+        factor = 1.0
+        continuous = 1.0
+        body = ''
+        score = 0
+        html = ''
+        candidate = []
+        # calculate score
+        for b in blocks:
+            if len(body) > 0:
+                continuous /= self.continuous_factor
+            if len(b.text) == 0:
+                continue
+            if len(b.reduced_text) == 0:
+                continue
+            b.calculate(factor, continuous)
+            if b.score1 > self.threshold:
+                body += b.text
+                html += b.html
+                score += b.score1
+                continuous = self.continuous_factor
+            elif b.score > self.threshold:
+                candidate.append({ 'body': body, 'score': score, 'html': html })
+                body = b.text
+                html = b.html
+                score = b.score
+                continuous = self.continuous_factor
+        candidate.append({ 'body': body, 'score': score, 'html': html })
+        return candidate
 
-class _EmptyBlock(object):
+class _Empty(object):
     
     def __init__(self):
+        # represent for empty block
         self.html = ""
         self.text = ""
         self.reduced_text = ""
         self.score = 0
         self.score1 = 0
-    
-# represent div, section, article blocks
+
 class _Block(object):
     
     def __init__(self, html):
+        # represent for div and h1-h5 block
+        self.decay_factor = 0.73
         dom = lxml.html.fromstring(html)
         self.html = html
         self.text = dom.text_content()
-        self.reduced_text = self._get_reduced_text(dom)
+        self.reduced_text = self.reduce_text(dom)
         self.score = 0
         self.score1 = 0
     
-    def _get_reduced_text(self, dom):
-        # return text removed link text
+    def reduce_text(self, dom):
+        # remove links
         dom = copy.deepcopy(dom)
         a_list = dom.xpath('//a')
         a_count = len(a_list)
@@ -49,118 +130,46 @@ class _Block(object):
                 a.drop_tree()
         except AssertionError:
             pass
-        # at least link-removed content has to have 20 charactors.
+        # At least link-removed content has to have 20 charactors.
         if len(re.compile('\s').sub('', dom.text_content())) < 20 * a_count:
             return ""
-        if self.has_link_list():
+        if is_collection_of_links(self):
             return ""
         return dom.text_content()
     
-    def has_link_list(self):
-        # not implemented
-        return False
-    
-    def calculate_score(self, factor, continuous):
+    def calculate(self, factor, continuous):
+        # calculate score
         self.score = len(self.reduced_text) * factor
-        factor *= decay_factor
-        _not_body_rate = not_body_rate()
-        if _not_body_rate > 0:
-            self.score *= (0.72 ** _not_body_rate)
+        factor *= self.decay_factor
+        rate = not_body_rate(self)
+        if rate > 0:
+            self.score *= (0.72 ** rate)
         self.score1 = self.score * continuous
-
-def _from_document(doc):
-    # doc has to be html document.
-    # return dom for mainly use of xpath and cssselect.
-    return lxml.html.fromstring(doc)
-
-def _candidate(dom):
-    # return body content as list
-    result = []
-    content = ''
-    for e in list(dom.xpath('body')[0]):
-        content += lxml.html.tostring(e)
-    # extract div content
-    match = re.compile('<div.*?>|</div>|<h.>|</h.>', re.DOTALL).split(content);
-    for m in match:
-        # ignore content has only white spaces
-        if len(re.compile('\s').sub('', m)) > 0:
-            try:
-                b = _Block(m)
-            except ParserError:
-                result.append(_EmptyBlock())
-            else:
-                result.append(b)
-        else:
-            # we can not ignore empty block
-            # has to influence distance of layout block
-            result.append(_EmptyBlock())
-            
-    return result
-
-def _cleanup_document(doc):
-    # remove ignore tags
-    doc = SCRIPT_REGX.sub('', doc)
-    doc = NOSCRIPT_REGX.sub('', doc)
-    doc = STYLE_REGX.sub('', doc)
-    doc = IFRAME_REGX.sub('', doc)
-    doc = SELECT_REGX.sub('', doc)
-    doc = COMMENT_REGX.sub('', doc)
-    return doc
-
-def _analyse(blocks):
-    factor = 1.0
-    continuous = 1.0
-    body = ''
-    score = 0
-    html = ''
-    candidate = []
-    # calculate score
-    for b in blocks:
-        if len(body) > 0:
-            continuous /= continuous_factor
-        if len(b.text) == 0:
-            continue
-        if len(b.reduced_text) == 0:
-            continue
-        b.calculate_score(factor, continuous)
-        if b.score1 > threshold:
-            body += b.text
-            html += b.html
-            score += b.score1
-            continuous = continuous_factor
-        elif b.score > threshold:
-            candidate.append({ 'body': body, 'score': score, 'html': html })
-            body = b.text
-            html = b.html
-            score = b.score
-            continuous = continuous_factor
-    candidate.append({ 'body': body, 'score': score, 'html': html })
-    return candidate
 
 # we expect you to override in response to necessary.
 # but need customize not necessarily.
-def not_body_rate():
+def is_collection_of_links(block):
+    # whether this layout block is a collection of links.
+    return False
+
+# we expect you to override in response to necessary.
+# but need customize not necessarily.
+def not_body_rate(block):
     # not_body_rate() takes account of not_body_rate.
     # return value has to be float or integer.
     return 0
 
-def extract(doc):
-    doc = force_unicode(doc)
-    doc = htmlentity2unicode(doc)
-    doc = _from_document(_cleanup_document(doc))
-    blocks = _candidate(doc)
-    # sort by score
-    candidate = { 'body': None, 'score': 0, 'html': None }
-    for b in _analyse(blocks):
-        if candidate['score'] < b['score']:
-            candidate = b
+def extract(document):
+    html = _HTML(document)
+    candidate = html.extract()
     return candidate
 
-def extract_img(doc):
-    b = extract(doc)
-    img_candidate = lxml.html.fromstring(b['html'])
+def extract_img(document):
+    # get candidate block
+    b = extract(document)
+    dom = lxml.html.fromstring(b['html'])
     candidate = []
-    for e in img_candidate.xpath('//img'):
+    for e in dom.xpath('//img'):
         candidate.append({'src': e.get('src'), 'alt': e.get('alt'), 'width': e.get('width'), 'height': e.get('height')});
     return candidate
 

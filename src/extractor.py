@@ -4,7 +4,7 @@ import re
 import lxml.html
 from lxml.etree import ParserError
 import copy
-from charset import force_unicode, htmlentity2unicode
+from charset import to_unicode, to_unicode_if_htmlentity
 
 script_regx = re.compile('<script.*?/script>', re.DOTALL)
 noscript_regx = re.compile('<noscript.*?/noscript>', re.DOTALL)
@@ -19,11 +19,11 @@ class _HTML(object):
         self.threshold = 100
         self.min_length = 80
         self.continuous_factor = 1.62
-        self.document = self.clean(force_unicode(document))
+        self.document = self.clean(to_unicode(document))
     
     def clean(self, document):
         # remove unnecessary tags from document
-        document = htmlentity2unicode(document)
+        document = to_unicode_if_htmlentity(document)
         # remove ignore tags
         document = script_regx.sub('', document)
         document = noscript_regx.sub('', document)

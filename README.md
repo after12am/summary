@@ -1,6 +1,6 @@
 <h1>Summary</h1>
 
-A python script extracting main content from web page. This library works well in japanese site and english site.
+A python script extracting main text and images from web page. This library works well in japanese site and english site.
 
 <h3>Copyright of the original implementation</h3>
 

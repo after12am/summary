@@ -19,6 +19,7 @@ class _HTML(object):
         self.threshold = 100
         self.min_length = 80
         self.continuous_factor = 1.62
+        self.decay_factor = 0.93
         self.document = self.clean(to_unicode(document))
     
     def clean(self, document):
@@ -38,20 +39,36 @@ class _HTML(object):
         dom = lxml.html.fromstring(self.document)
         blocks = self.divide_into_blocks(dom)
         # sort by score
-        candidate = { 'body': None, 'score': 0, 'html': None }
+        candidate = { 'title': None, 'body': None, 'score': 0, 'html': None }
         for b in self.analyse(blocks):
             if candidate['score'] < b['score']:
                 candidate = b
         return candidate
     
     def divide_into_blocks(self, dom):
-        # divide into layout blocks
         result = []
         content = ''
         for e in list(dom.xpath('body')[0]):
             content += lxml.html.tostring(e)
-        # extract div content
-        match = re.compile('<div.*?>|</div>|<h.>|</h.>', re.DOTALL).split(content);
+        # divide content into layout blocks
+        match = [m for m in re.compile(r'<div.*?>|</div>|<(h.).*?>|</(h.)>', re.DOTALL).split(content) if m]
+        new_match = []
+        hx = ''
+        for m in match:
+            _m = None
+            if m:
+                _m = re.compile('h.', re.DOTALL).match(m)
+            if _m:
+                if hx == '':
+                    hx = '<%s>' % _m.group()
+                else:
+                    new_match.append(hx + '</%s>' % _m.group())
+                    hx = ''
+            elif hx:
+                hx += m
+            else:
+                new_match.append(m)
+        match = new_match
         for m in match:
             # ignore content has only white spaces
             if len(re.compile('\s').sub('', m)) > 0:
@@ -75,6 +92,7 @@ class _HTML(object):
         score = 0
         html = ''
         candidate = []
+        _blocks = []
         # calculate score
         for b in blocks:
             if len(body) > 0:
@@ -83,19 +101,43 @@ class _HTML(object):
                 continue
             if len(b.reduced_text) == 0:
                 continue
+            factor *= self.decay_factor
             b.calculate(factor, continuous)
             if b.score1 > self.threshold:
                 body += b.text
                 html += b.html
                 score += b.score1
+                _blocks.append(b)
                 continuous = self.continuous_factor
             elif b.score > self.threshold:
-                candidate.append({ 'body': body, 'score': score, 'html': html })
+                candidate.append({ 'body': body, 'score': score, 'html': html, 'blocks': _blocks })
+                factor = 1.0
                 body = b.text
                 html = b.html
                 score = b.score
+                _blocks = [b]
                 continuous = self.continuous_factor
-        candidate.append({ 'body': body, 'score': score, 'html': html })
+        candidate.append({ 'body': body, 'score': score, 'html': html, 'blocks': _blocks })
+        # extract title
+        for c in candidate:
+            factor = 1.0
+            continuous = 1.0
+            title = ''
+            score = 0
+            if len(c['blocks']) and blocks.index(c['blocks'][0]) > 0:
+                n = range(0, blocks.index(c['blocks'][0]) - 1)
+                n.reverse()
+                for b in [blocks[i] for i in n]:
+                    if len(title) > 0:
+                        continuous /= self.continuous_factor
+                    if len(b.text) == 0:
+                        continue
+                    # factor *= self.decay_factor
+                    b.calculate_title_rate(factor, continuous)
+                    if b.title_score1 > score:
+                        score = b.title_score1
+                        title = b.text
+            c['title'] = title
         return candidate
 
 class _Empty(object):
@@ -107,18 +149,21 @@ class _Empty(object):
         self.reduced_text = ""
         self.score = 0
         self.score1 = 0
+        self.title_score = 0
+        self.title_score1 = 0
 
 class _Block(object):
     
     def __init__(self, html):
-        # represent for div and h1-h5 block
-        self.decay_factor = 0.73
-        dom = lxml.html.fromstring(html)
+        # represent for div and h1-h6 block
+        self.dom = lxml.html.fromstring(html)
         self.html = html
-        self.text = dom.text_content()
-        self.reduced_text = self.reduce_text(dom)
+        self.text = self.dom.text_content()
+        self.reduced_text = self.reduce_text(self.dom)
         self.score = 0
         self.score1 = 0
+        self.title_score = 0
+        self.title_score1 = 0
     
     def reduce_text(self, dom):
         # remove links
@@ -140,11 +185,22 @@ class _Block(object):
     def calculate(self, factor, continuous):
         # calculate score
         self.score = len(self.reduced_text) * factor
-        factor *= self.decay_factor
         rate = not_body_rate(self)
         if rate > 0:
             self.score *= (0.72 ** rate)
         self.score1 = self.score * continuous
+    
+    def calculate_title_rate(self, factor, continuous):
+        # calculate title score
+        # define 40 as title regular length
+        text = re.compile('\s').sub('', self.text)
+        if not len(text): return
+        self.title_score = (factor / len(self.text)) * 100
+        m = re.compile(r'h(.)', re.DOTALL).match(self.dom.tag)
+        if m:
+            # h1 - h6
+            self.title_score *= float(6.0 / float(m.groups()[0])) * 4.63
+        self.title_score1 = self.title_score * continuous
 
 # we expect you to override in response to necessary.
 # but need customize not necessarily.
@@ -182,6 +238,7 @@ def main():
         <title></title>
     </head>
     <body>
+        <h1 id="header">Fab Speakers</h1>
         <div>
             <img src="sample.jpeg"/>
             These portable speakers are made from laser-cut wood, fabric, veneer, and electronics. They are powered by three AAA batteries and compatible with any standard audio jack (e.g. on an iPhone, iPod, or laptop).

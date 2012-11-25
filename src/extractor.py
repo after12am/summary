@@ -43,6 +43,7 @@ class _HTML(object):
         for b in self.analyse(blocks):
             if candidate['score'] < b['score']:
                 candidate = b
+        candidate['dom'] = dom
         return candidate
     
     def divide_into_blocks(self, dom):

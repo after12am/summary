@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import urllib, sys
-from extractor import extract, extract_img
+from extractor import extract
 
 def main():
     
@@ -13,7 +13,6 @@ def main():
         print 'Title: ', res['title'], '\n'
         print 'Content: ', res['body'], '\n'
         print 'Images: ', res['img'], '\n'
-        # print extract_img(urllib.urlopen(uri).read()), '\n'
     except:
         print sys.exc_info()[0], sys.exc_info()[1]
     
@@ -24,7 +23,6 @@ def main():
         print 'Title: ', res['title'], '\n'
         print 'Content: ', res['body'], '\n'
         print 'Images: ', res['img'], '\n'
-        # print extract_img(urllib.urlopen(uri).read()), '\n'
     except:
         print sys.exc_info()[0], sys.exc_info()[1]
     
@@ -37,7 +35,6 @@ def main():
         print 'Title: ', res['title'], '\n'
         print 'Content: ', res['body'], '\n'
         print 'Images: ', res['img'], '\n'
-        # print extract_img(urllib.urlopen(uri).read()), '\n'
     except:
         print sys.exc_info()[0], sys.exc_info()[1]
     
@@ -48,7 +45,6 @@ def main():
         print 'Title: ', res['title'], '\n'
         print 'Content: ', res['body'], '\n'
         print 'Images: ', res['img'], '\n'
-        # print extract_img(urllib.urlopen(uri).read()), '\n'
     except:
         print sys.exc_info()[0], sys.exc_info()[1]
     
@@ -59,7 +55,6 @@ def main():
         print 'Title: ', res['title'], '\n'
         print 'Content: ', res['body'], '\n'
         print 'Images: ', res['img'], '\n'
-        # print extract_img(urllib.urlopen(uri).read()), '\n'
     except:
         print sys.exc_info()[0], sys.exc_info()[1]
 

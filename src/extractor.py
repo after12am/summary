@@ -133,7 +133,7 @@ class _HTML(object):
                         continuous /= self.continuous_factor
                     if len(b.text) == 0:
                         continue
-                    # factor *= self.decay_factor
+                    factor *= self.decay_factor
                     b.calculate_title_rate(factor, continuous)
                     if b.title_score1 > score:
                         score = b.title_score1

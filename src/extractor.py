@@ -218,15 +218,10 @@ def not_body_rate(block):
 def extract(document):
     html = _HTML(document)
     candidate = html.extract()
-    return candidate
-
-def extract_img(document):
-    # get candidate block
-    b = extract(document)
-    dom = lxml.html.fromstring(b['html'])
-    candidate = []
+    dom = lxml.html.fromstring(candidate['html'])
+    candidate.setdefault('img', [])
     for e in dom.xpath('//img'):
-        candidate.append({'src': e.get('src'), 'alt': e.get('alt'), 'width': e.get('width'), 'height': e.get('height')});
+        candidate['img'].append({'src': e.get('src'), 'alt': e.get('alt'), 'width': e.get('width'), 'height': e.get('height')});
     return candidate
 
 def main():
@@ -251,6 +246,5 @@ def main():
     </html>
     '''
     print extract(doc)
-    print extract_img(doc)
 
 if __name__ == '__main__': main()

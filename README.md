@@ -5,18 +5,14 @@ Summary is a python script to extract main content from the web page. This scrip
 
 ## Usage
 
-for getting main text.
+Here shows you to get summary from the web page.
 
 ```
 uri = 'web page you want to extract main text.'
-print extract(urllib.urlopen(uri).read())['body'], '\n'
-```
-
-for getting main image.
-
-```
-uri = 'web page you want to extract main image.'
-print extract_img(urllib.urlopen(uri).read()), '\n'
+res = extract(urllib.urlopen(uri).read())
+print res['title'], '\n'
+print res['body'], '\n' # main content
+print res['img'], '\n' # candidates of main image
 ```
 
 Also, you can override extractor's methods in response to your necessary. Here is a method that decides whether layout block is a collection of links.

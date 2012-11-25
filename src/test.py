@@ -12,7 +12,8 @@ def main():
         res = extract(urllib.urlopen(uri).read())
         print 'Title: ', res['title'], '\n'
         print 'Content: ', res['body'], '\n'
-        print extract_img(urllib.urlopen(uri).read()), '\n'
+        print 'Images: ', res['img'], '\n'
+        # print extract_img(urllib.urlopen(uri).read()), '\n'
     except:
         print sys.exc_info()[0], sys.exc_info()[1]
     
@@ -22,7 +23,8 @@ def main():
         res = extract(urllib.urlopen(uri).read())
         print 'Title: ', res['title'], '\n'
         print 'Content: ', res['body'], '\n'
-        print extract_img(urllib.urlopen(uri).read()), '\n'
+        print 'Images: ', res['img'], '\n'
+        # print extract_img(urllib.urlopen(uri).read()), '\n'
     except:
         print sys.exc_info()[0], sys.exc_info()[1]
     
@@ -34,7 +36,8 @@ def main():
         res = extract(urllib.urlopen(uri).read())
         print 'Title: ', res['title'], '\n'
         print 'Content: ', res['body'], '\n'
-        print extract_img(urllib.urlopen(uri).read()), '\n'
+        print 'Images: ', res['img'], '\n'
+        # print extract_img(urllib.urlopen(uri).read()), '\n'
     except:
         print sys.exc_info()[0], sys.exc_info()[1]
     
@@ -44,7 +47,8 @@ def main():
         res = extract(urllib.urlopen(uri).read())
         print 'Title: ', res['title'], '\n'
         print 'Content: ', res['body'], '\n'
-        print extract_img(urllib.urlopen(uri).read()), '\n'
+        print 'Images: ', res['img'], '\n'
+        # print extract_img(urllib.urlopen(uri).read()), '\n'
     except:
         print sys.exc_info()[0], sys.exc_info()[1]
     
@@ -54,7 +58,8 @@ def main():
         res = extract(urllib.urlopen(uri).read())
         print 'Title: ', res['title'], '\n'
         print 'Content: ', res['body'], '\n'
-        print extract_img(urllib.urlopen(uri).read()), '\n'
+        print 'Images: ', res['img'], '\n'
+        # print extract_img(urllib.urlopen(uri).read()), '\n'
     except:
         print sys.exc_info()[0], sys.exc_info()[1]
 

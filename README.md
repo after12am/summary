@@ -1,12 +1,11 @@
 Summary
 =======
 
-This is a python module to extract main content, which are title, main text or images, from the web page. 
-This is simple and easy to use. 
+This is a python module to extract title, main text and images from the web page. This module is simple and easy to use.
 
 ## Usage
 
-Here shows you to get summary from the web page.
+Here is how you get summary from the web page.
 
 ```
 uri = 'web page you want to extract main text.'
@@ -16,8 +15,8 @@ print res['body'], '\n' # main content
 print res['img'], '\n' # candidates of main images
 ```
 
-In addition, you can override `is_collection_of_links()` and `not_body_rate()` in response to your necessary. 
-`is_collection_of_links()` decides whether layout block is a collection of links.
+In addition, you are able to override `is_collection_of_links()` and `not_body_rate()`, which are methods of extractor module, 
+in response to your necessary. `is_collection_of_links()` decides whether layout block is a collection of links.
 
 ```
 def is_collection_of_links(block):

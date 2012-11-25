@@ -1,7 +1,8 @@
 Summary
-========
+=======
 
-Summary is a python script to extract main content from the web page. This script is simple to use and provides easy way to pick up candidate of main text and image from body in html document. All you have to do is only one thing.
+This is a python module to extract main content, which are title, main text or images, from the web page. 
+This is simple and easy to use. 
 
 ## Usage
 
@@ -10,12 +11,13 @@ Here shows you to get summary from the web page.
 ```
 uri = 'web page you want to extract main text.'
 res = extract(urllib.urlopen(uri).read())
-print res['title'], '\n'
+print res['title'], '\n' # header of main content
 print res['body'], '\n' # main content
-print res['img'], '\n' # candidates of main image
+print res['img'], '\n' # candidates of main images
 ```
 
-Also, you can override extractor's methods in response to your necessary. Here is a method that decides whether layout block is a collection of links.
+In addition, you can override `is_collection_of_links()` and `not_body_rate()` in response to your necessary. 
+`is_collection_of_links()` decides whether layout block is a collection of links.
 
 ```
 def is_collection_of_links(block):
@@ -23,7 +25,7 @@ def is_collection_of_links(block):
     return False
 ```
 
-A method that takes account of not_body_rate.
+`not_body_rate()` decides the rate which means that layout block is not body.
 
 ```
 def not_body_rate(block):

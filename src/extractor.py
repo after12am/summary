@@ -94,7 +94,7 @@ class _HTML(object):
         html = ''
         candidate = []
         _blocks = []
-        # calculate score
+        # calculate score of main content
         for b in blocks:
             if len(body) > 0:
                 continuous /= self.continuous_factor
@@ -119,7 +119,7 @@ class _HTML(object):
                 _blocks = [b]
                 continuous = self.continuous_factor
         candidate.append({ 'body': body, 'score': score, 'html': html, 'blocks': _blocks })
-        # extract title
+        # calculate score of title
         for c in candidate:
             factor = 1.0
             continuous = 1.0
@@ -139,6 +139,9 @@ class _HTML(object):
                         score = b.title_score1
                         title = b.text
             c['title'] = title
+        # remove temporary key
+        for c in candidate:
+            del c['blocks']
         return candidate
 
 class _Empty(object):

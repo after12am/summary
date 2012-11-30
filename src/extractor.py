@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
-import sys
-import re
+import sys, re, copy
 import lxml.html
 from lxml.etree import ParserError
-import copy
 from charset import to_unicode, to_unicode_if_htmlentity
 
 script_regx = re.compile('<script.*?/script>', re.DOTALL)
@@ -103,7 +101,7 @@ class _HTML(object):
             if len(b.reduced_text) == 0:
                 continue
             factor *= self.decay_factor
-            b.calculate(factor, continuous)
+            b.calculate_body_rate(factor, continuous)
             if b.score1 > self.threshold:
                 body += b.text
                 html += b.html
@@ -186,14 +184,6 @@ class _Block(object):
             return ""
         return dom.text_content()
     
-    def calculate(self, factor, continuous):
-        # calculate score
-        self.score = len(self.reduced_text) * factor
-        rate = not_body_rate(self)
-        if rate > 0:
-            self.score *= (0.72 ** rate)
-        self.score1 = self.score * continuous
-    
     def calculate_title_rate(self, factor, continuous):
         # calculate title score
         # define 40 as title regular length
@@ -205,6 +195,15 @@ class _Block(object):
             # h1 - h6
             self.title_score *= float(6.0 / float(m.groups()[0])) * 4.63
         self.title_score1 = self.title_score * continuous
+    
+    def calculate_body_rate(self, factor, continuous):
+        # calculate score
+        self.score = len(self.reduced_text) * factor
+        rate = not_body_rate(self)
+        if rate > 0:
+            self.score *= (0.72 ** rate)
+        self.score1 = self.score * continuous
+    
 
 # we expect you to override in response to necessary.
 # but need customize not necessarily.

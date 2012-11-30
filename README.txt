@@ -8,7 +8,8 @@ So I improved not to extract that garbage as increasing of precision of
 calculating Layout Block, upon implementing this with python. 
 In addition, I added function to extract specious and appropriate title, 
 even if being not a standard coding about html document. 
-Summary is useful, and its usage is so simple that you call 1 api. Now, let's dive into web.
+Summary is useful, and its usage is so simple that you call 1 api. 
+Now, let's dive into web.
 
 ## Usage
 

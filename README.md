@@ -3,7 +3,7 @@ Summary
 
 Summary is a python module to extract main content from the web page. 
 This script was originally implemented by Nakatani Shuyo with ruby. 
-But his script extracts text including garbage, as a example, comments of blog entry. 
+But his script extracts text including garbage, e.g. comments of blog entry. 
 So I improved not to extract that garbage as increasing of precision of 
 calculating Layout Block, upon implementing this with python. 
 In addition, I added function to extract specious and appropriate title, 
@@ -63,6 +63,4 @@ extractor.not_body_rate = _not_body_rate
 
 Copyright © 2007/2008 Nakatani Shuyo / Cybozu Labs Inc. All rights reserved.
 
-<ul>
-    <li><a href="http://labs.cybozu.co.jp/blog/nakatani/2007/09/web_1.html">labs.cybozu.co.jp/blog/nakatani/2007/09/web_1.html</a></li>
-</ul>
+* [labs.cybozu.co.jp/blog/nakatani/2007/09/web_1.html](http://labs.cybozu.co.jp/blog/nakatani/2007/09/web_1.html)

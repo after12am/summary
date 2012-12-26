@@ -11,6 +11,14 @@ even if being not a standard coding about html document.
 Summary is useful, and its usage is so simple that you call 1 api. 
 Now, let's dive into web.
 
+## Install
+
+I prepares easy install way. Run the below command in your new terminal.
+
+```
+sudo easy_install "summary==0.1.1"
+```
+
 ## Usage
 
 Here is how you get summary from the web page.

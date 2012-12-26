@@ -14,11 +14,18 @@ urls = [
 
 def extract_test(url):
     try:
+        print '==========' * 12 + '\n'
         print url, '\n'
         res = extract(urllib.urlopen(url).read())
-        print 'Title: ', res['title'], '\n'
-        print 'Content: ', res['body'], '\n'
-        print 'Images: ', res['img'], '\n'
+        print '[Title]'
+        print res['title'] + '\n'
+        print '[Content]'
+        print res['body'] + '\n'
+        if len(res['img']):
+            print '[Images]'
+            for img in res['img']:
+                print img['src']
+            print '\n'
     except:
         print sys.exc_info()[0], sys.exc_info()[1]
 

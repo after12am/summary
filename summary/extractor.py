@@ -4,16 +4,10 @@ import lxml.html
 from lxml.etree import ParserError
 from charset import to_unicode, to_unicode_if_htmlentity
 
-script_regx = re.compile('<script.*?/script>', re.DOTALL)
-noscript_regx = re.compile('<noscript.*?/noscript>', re.DOTALL)
-style_regx = re.compile('<style.*?/style>', re.DOTALL)
-iframe_regx = re.compile('<iframe.*?/iframe>', re.DOTALL)
-select_regx = re.compile('<select.*?/select>', re.DOTALL)
-comment_regx = re.compile('<!--.*?-->', re.DOTALL)
-
 class _HTML(object):
     
     def __init__(self, document):
+        self.ignore_tags = ['script', 'noscript', 'style', 'iframe', 'select']
         self.threshold = 100
         self.min_length = 80
         self.continuous_factor = 1.62
@@ -21,15 +15,12 @@ class _HTML(object):
         self.document = self.clean(to_unicode(document))
     
     def clean(self, document):
-        # remove unnecessary tags from document
         document = to_unicode_if_htmlentity(document)
+        # remove comment
+        document = re.compile('<!--.*?-->', re.DOTALL).sub('', document)
         # remove ignore tags
-        document = script_regx.sub('', document)
-        document = noscript_regx.sub('', document)
-        document = style_regx.sub('', document)
-        document = iframe_regx.sub('', document)
-        document = select_regx.sub('', document)
-        document = comment_regx.sub('', document)
+        for tag in self.ignore_tags:
+            document = re.compile('<%s.*?/%s>' % (tag, tag), re.DOTALL).sub('', document)
         return document
     
     def extract(self):
@@ -160,7 +151,7 @@ class _Block(object):
         # represent for div and h1-h6 block
         self.dom = lxml.html.fromstring(html)
         self.html = html
-        self.text = self.dom.text_content()
+        self.text = self.dom.text_content().strip()
         self.reduced_text = self.reduce_text(self.dom)
         self.score = 0
         self.score1 = 0
@@ -234,8 +225,16 @@ def main():
     <head>
         <meta charset="UTF-8">
         <title></title>
+        <style>
+        body {
+            background: #000;
+        }
+        </style>
     </head>
     <body>
+        <script type="type/javascript">alert();</script>
+        <noscript>this is part of noscript</noscript>
+        <iframe>this is part of iframe</iframe>
         <h1 id="header">Fab Speakers</h1>
         <div>
             <img src="sample.jpeg"/>
@@ -245,6 +244,11 @@ def main():
         <div>separator</div>
         <p>The speakers aren't yet available as a kit, but you can download the files and make them for yourself.</p>
         <div>Use 6mm (1/4") plywood. For the veneer, 1 9/16" edging backed with an iron-on adhesive is ideal (like this one from Rockler), but anything should work if you cut it to that width. Pick whatever fabric you like. For the electronic components, see the bill-of-materials above. You'll also need two-conductor speaker wire, available at Radio Shack.</div>
+        <select>
+        <option>opt_a</option>
+        <option>opt_b</option>
+        <option>opt_c</option>
+        </select>
     </body>
     </html>
     '''

@@ -24,15 +24,14 @@ setup(
     long_description = """\
 
 Extractor to get main content from the web page.
-
  - title
-
  - body
+ - candidates of main image
 
- - candidate of main images
+Install
+   sudo easy_install "summary==0.1.1"
 
 Usages
-
-visit at https://github.com/after12am/summary
+   visit at https://github.com/after12am/summary
 """
 )

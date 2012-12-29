@@ -215,7 +215,7 @@ def extract(document):
     dom = lxml.html.fromstring(candidate['html'])
     candidate.setdefault('img', [])
     for e in dom.xpath('//img'):
-        candidate['img'].append({'src': e.get('src'), 'alt': e.get('alt'), 'width': e.get('width'), 'height': e.get('height')});
+        candidate['img'].append(e.attrib);
     return candidate
 
 def main():
@@ -237,7 +237,7 @@ def main():
         <iframe>this is part of iframe</iframe>
         <h1 id="header">Fab Speakers</h1>
         <div>
-            <img src="sample.jpeg"/>
+            <img src="sample.jpeg" width="200" height="200" alt=""/>
             These portable speakers are made from laser-cut wood, fabric, veneer, and electronics. They are powered by three AAA batteries and compatible with any standard audio jack (e.g. on an iPhone, iPod, or laptop).
             <p>The speakers are an experiment in open-source hardware applied to consumer electronics. By making their original design files freely available online, in a way that's easy for others to modify, I hope to encourage people to make and modify them. In particular, I'd love to see changes or additions that I didn't think about and to have those changes shared publicly for others to use or continue to modify. The speakers have been designed to be relatively simple and cheap in the hopes of facilitating their production by others.</p>
         </div>

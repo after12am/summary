@@ -1,6 +1,10 @@
 import re, chardet, htmlentitydefs
 import lxml.html
 
+class UnknownEncodingException(Exception):
+    def __init__(self):
+        Exception.__init__(self, 'Unknown encoding')
+
 def encoding_if_html(text):
     REGX_CHARSET = r"charset=(?P<charset>[a-zA-Z0-9-]+)"
     root = lxml.html.fromstring(text.lower())
@@ -14,7 +18,7 @@ def encoding_if_html(text):
             encoding = re.compile(REGX_CHARSET).findall(content)
             if encoding:
                 return encoding[0].strip()
-    raise
+    raise UnknownEncodingException()
 
 def encoding_if_text(text):
     # as we suppose text as html string

@@ -29,12 +29,9 @@ def encoding_if_text(text):
     return encoding
 
 def to_unicode(text):
-    try:
-        unicoded = unicode(text, 'utf-8', 'replace')
-    except:
-        unicoded, encoding = None, encoding_if_text(text)
-        if encoding:
-            unicoded = unicode(text, encoding, 'replace')
+    unicoded, encoding = None, encoding_if_text(text)
+    if encoding:
+        unicoded = unicode(text, encoding, 'replace')
     return unicoded
 
 def to_unicode_if_htmlentity(text):

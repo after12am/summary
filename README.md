@@ -72,3 +72,4 @@ extractor.not_body_rate = _not_body_rate
 Copyright © 2007/2008 Nakatani Shuyo / Cybozu Labs Inc. All rights reserved.
 
 * [labs.cybozu.co.jp/blog/nakatani/2007/09/web_1.html](http://labs.cybozu.co.jp/blog/nakatani/2007/09/web_1.html)
+* tfidf.py is under development.

@@ -2,14 +2,22 @@ Summary
 =======
 
 Summary is a python module to extract main content from the web page. 
-This script was originally implemented by Nakatani Shuyo with ruby. 
-But his script extracts text including garbage, e.g. comments of blog entry. 
-So I improved not to extract that garbage as increasing of precision of 
-calculating Layout Block, upon implementing this with python. 
-In addition, I added function to extract specious and appropriate title, 
-even if being not a standard coding about html document. 
-Summary is useful, and its usage is so simple that you call 1 api. 
-Now, let's dive into web.
+This was originally implemented by Nakatani Shuyo with ruby. 
+His strategy and implementation about extraction is great. But there is room for improvement. 
+The extracted includes the garbages, e.g. comments of blog entry. 
+So I improved not to extract those as increasing of precision of calculating Layout Block, upon implementing with python. 
+Summary extracts specious and appropriate title in addition to main content, even if being broken.
+
+
+## Strategy
+
+1. removes the unnecessary elements from the web page.
+2. divides block elements into layout blocks and empty blocks.
+3. scores the those blocks.
+4. clusters the high score blocks that are next each others.
+5. scores the clusters.
+6. high score cluster is what we have been seeking. 
+
 
 ## Install
 

@@ -6,22 +6,23 @@ This was originally implemented by Nakatani Shuyo with ruby.
 His strategy and implementation about extraction is great. But there is room for improvement. 
 The extracted includes the garbages, e.g. comments of blog entry. 
 So I improved not to extract those as increasing of precision of calculating Layout Block, upon implementing with python. 
-Summary extracts specious and appropriate title in addition to main content, even if being broken.
+Summary extracts specious and appropriate title in addition to main content, even if being broken page.
 
 
-## Strategy
+strategy is:
 
+```
 1. removes the unnecessary elements from the web page.
 2. divides block elements into layout blocks and empty blocks.
 3. scores the those blocks.
 4. clusters the high score blocks that are next each others.
 5. scores the clusters.
 6. high score cluster is what we have been seeking. 
-
+```
 
 ## Install
 
-I prepares easy install way. Run the below command in your new terminal.
+I prepares easy install way. Run the command in your new terminal.
 
 ```
 sudo easy_install "summary==0.1.1"
@@ -40,9 +41,8 @@ print res['body'], '\n' # main content
 print res['img'], '\n' # candidates of main images
 ```
 
-In addition, you are able to override `is_collection_of_links()` and 
-`not_body_rate()`, which are methods of extractor module, in response to your necessary. 
-`is_collection_of_links()` decides whether layout block is a collection of links.
+Here is the way to override `is_collection_of_links()` and `not_body_rate()`, which are parts of extractor module, 
+in response to your necessary. `is_collection_of_links()` decides whether layout block is a collection of links.
 
 ```
 # /path/to/any.py

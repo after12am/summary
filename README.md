@@ -41,8 +41,9 @@ print res['body'], '\n' # main content
 print res['img'], '\n' # candidates of main images
 ```
 
-Here is the way to override `is_collection_of_links()` and `not_body_rate()`, which are parts of extractor module, 
-in response to your necessary. `is_collection_of_links()` decides whether layout block is a collection of links.
+Here shows the way to override the noise filters of extractor module. Use these overriding in response to your necessary. 
+The noise filters you can override are `is_collection_of_links()` and `not_body_rate()`. 
+`is_collection_of_links()` decides whether layout block is a collection of links.
 
 ```
 # /path/to/any.py

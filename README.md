@@ -4,9 +4,9 @@ Summary
 Summary is a python module to extract main content from the web page. 
 This was originally implemented by Nakatani Shuyo with ruby. 
 His strategy and implementation about extraction is great. But there is room for improvement. 
-The extracted includes the garbages, e.g. comments of blog entry. 
-So I improved not to extract those as increasing of precision of calculating Layout Block, upon implementing with python. 
-Summary extracts specious and appropriate title in addition to main content, even if being broken page.
+The extracted content includes the garbages, e.g. comments of blog entry. 
+I improved not to extract those as increasing of precision of calculating Layout Block, upon implementing with python. 
+And also Summary extracts not only main content but also appropriate title, even if being broken page.
 
 
 strategy is:
@@ -22,7 +22,7 @@ strategy is:
 
 ## Install
 
-I prepares easy install way. Run the command in your new terminal.
+I prepare easy install way. Run the following command in your new terminal.
 
 ```
 sudo easy_install "summary==0.1.1"

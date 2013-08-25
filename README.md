@@ -49,12 +49,12 @@ in response to your necessary. `is_collection_of_links()` decides whether layout
 # include `is_collection_of_links()` for overriding
 from summary import extractor
 
-def _is_collection_of_links(block):
+def my_is_collection_of_links(block):
     # whether this layout block is a collection of links.
     print block
     return False
 
-extractor.is_collection_of_links = _is_collection_of_links
+extractor.is_collection_of_links = my_is_collection_of_links
 ```
 
 `not_body_rate()` decides the rate which means that layout block is not body.
@@ -64,13 +64,13 @@ extractor.is_collection_of_links = _is_collection_of_links
 # include `not_body_rate()` for overriding
 from summary import extractor
 
-def _not_body_rate(block):
+def my_not_body_rate(block):
     # not_body_rate() takes account of not_body_rate.
     # return value has to be float or integer.
     print block
     return 0
 
-extractor.not_body_rate = _not_body_rate
+extractor.not_body_rate = my_not_body_rate
 ```
 
 ## Notes

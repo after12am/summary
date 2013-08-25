@@ -36,13 +36,13 @@ Here is how you get summary from the web page.
 from summary import extract
 uri = 'web page you want to extract main text.'
 res = extract(urllib.urlopen(uri).read())
-print res['title'], '\n' # header of main content
+print res['title'], '\n' # title of main content
 print res['body'], '\n' # main content
 print res['img'], '\n' # candidates of main images
 ```
 
 Here shows the way to override the noise filters of extractor module. Use these overriding in response to your necessary. 
-The noise filters you can override are `is_collection_of_links()` and `not_body_rate()`. 
+The noise filters are `is_collection_of_links()` and `not_body_rate()`. 
 `is_collection_of_links()` decides whether layout block is a collection of links.
 
 ```
@@ -58,7 +58,7 @@ def my_is_collection_of_links(block):
 extractor.is_collection_of_links = my_is_collection_of_links
 ```
 
-`not_body_rate()` decides the rate which means that layout block is not body.
+`not_body_rate()` decides the rate which means given layout block is not body.
 
 ```
 # /path/to/any.py

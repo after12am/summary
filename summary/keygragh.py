@@ -5,41 +5,53 @@ import nltk
 from collections import defaultdict
 from pprint import pprint
 
+FETCH_FREQ_NUM = 30
+FETCH_HIGH_KEY_NUM = 12
 
-stopwords = nltk.corpus.stopwords.words('english')
 
-
-class _BigramTokenizer(object):
+class Corpus(object):
+    
+    PATH_STOPWORDS = 'corpus/en/stopwords.txt'
     
     def __init__(self):
+        self.stopwords = self.read('stopwords')
+    
+    def read(self, corpus):
+        if corpus == 'stopwords':
+            fp = open('%s/%s' % (os.path.dirname(__file__) , self.PATH_STOPWORDS), 'r')
+            data = fp.read().splitlines()
+            fp.close()
+            return data
+        return None
+
+
+class _BigramTokenizer(Corpus):
+    
+    def __init__(self):
+        super(_BigramTokenizer, self).__init__()
         self.measures = nltk.collocations.BigramAssocMeasures()
         self.finder = nltk.collocations.BigramCollocationFinder
     
     def tokenize(self, words):
         finder = self.finder.from_words(words)
         finder.apply_freq_filter(2)
-        finder.apply_word_filter(lambda w: len(w) < 3 or w.lower() in stopwords)
+        finder.apply_word_filter(lambda w: len(w) < 3 or w.lower() in self.stopwords)
         return finder.nbest(self.measures.likelihood_ratio, 10)
 
 
-class _Measure(object):
+class _Finder(Corpus):
     
     def __init__(self, text):
+        super(_Finder, self).__init__()
         self.text = self.normalize(text)
-        self.sentences = None
         self.lemmatizer = nltk.WordNetLemmatizer()
     
     def normalize(self, text):
         norm = text.lower()
+        # from misc.charset import to_unicode, to_unicode_if_htmlentity
         # norm = to_unicode(norm)
         # norm = to_unicode_if_htmlentity(norm)
-        # return norm
         return norm
-    
-    def find_high_freq(self, num = 30):
-        words = self.find_words()
-        words = sorted(words, key=lambda x: x[1], reverse = True)
-        return words[:num]
     
     def find_words(self):
         words = nltk.word_tokenize(self.text)
@@ -52,7 +64,7 @@ class _Measure(object):
             text = text.replace(bi, '')
         # get words except bigrams
         words = nltk.word_tokenize(text)
-        words = [re.sub(r'\.$', '', w).lower() for w in words if len(w) > 3 and not w in stopwords]
+        words = [re.sub(r'\.$', '', w).lower() for w in words if len(w) > 3 and not w in self.stopwords]
         # lemmatize words
         words = [self.lemmatizer.lemmatize(w) for w in words]
         freq = defaultdict(int)
@@ -81,55 +93,40 @@ class _Measure(object):
         return [(' '.join(bi), count) for bi, count in freq]
     
     def divide_into_senteces(self, cache = True):
-        if cache and isinstance(self.sentences, list):
-            return self.sentences
         tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
         sentences = tokenizer.tokenize(self.text)
         # remove period from end of sentence
-        sentences = [re.sub(r'\.$', '', sentence) for sentence in sentences]
-        self.sentences = sentences
-        return self.sentences
-
+        return [re.sub(r'\.$', '', sentence) for sentence in sentences]
 
 
 class _KeyGraph(nx.Graph):
     
-    def __init__(self, measure):
+    def __init__(self, text):
         super(_KeyGraph, self).__init__()
-        self.measure = measure
-        self.foundations = None
+        self.sentences = _Finder(text).divide_into_senteces()
+        self._foundations = None
     
     def find_foundations(self, cache = True):
-        if cache and isinstance(self.foundations, list):
-            return self.foundations
+        if cache and isinstance(self._foundations, list):
+            return self._foundations
         foundations = list(nx.find_cliques(self))
-        foundations = self.reduce_cliques(foundations)
-        self.foundations = foundations
-        return self.foundations
+        foundations = self._reduce_cliques(foundations)
+        self._foundations = foundations
+        return self._foundations
     
-    def reduce_cliques(self, cliques):
+    def _reduce_cliques(self, cliques):
         for i, clique in enumerate(cliques):
             for j in range(i + 1, len(cliques)):
                 for word in clique:
                     if word in cliques[j]:
                         cliques[i] = list(set(cliques[i] + cliques[j]))
                         del cliques[j]
-                        return self.reduce_cliques(cliques)
+                        return self._reduce_cliques(cliques)
         return cliques
-    
-    def calculate_collocations(self, words):
-        co = []
-        for i, item in enumerate(words):
-            for j in range(i + 1, len(words)):
-                co.append((item, words[j], self.co(item, words[j])))
-        # filter by frequency of collocation
-        co = [item for item in co if item[2] > 0]
-        # order by frequency
-        return sorted(co, key=lambda x: x[2], reverse=True)
     
     def co(self, word1, word2):
         score = 0
-        for sentence in self.measure.divide_into_senteces():
+        for sentence in self.sentences:
             if ' %s ' % word1 in sentence:
                 if ' %s ' % word2 in sentence.replace(word1, ''):
                     score += 1
@@ -137,7 +134,7 @@ class _KeyGraph(nx.Graph):
     
     def co2(self, word, PG):
         score = 0
-        for sentence in self.measure.divide_into_senteces():
+        for sentence in self.sentences:
             for node in PG:
                 if word is not node:
                     if ' %s ' % word in sentence:
@@ -146,10 +143,10 @@ class _KeyGraph(nx.Graph):
                             break
         return score
     
-    def high_key(self, words, num = 12):
+    def high_key(self, words, fetch_num):
         keys = [self.key(w) for w in words];
         keys = sorted(keys, key=lambda x: x[1], reverse=True)
-        return keys[:num]
+        return keys[:fetch_num]
     
     def key(self, word):
         foundations = self.find_foundations()
@@ -159,7 +156,7 @@ class _KeyGraph(nx.Graph):
     
     def c(self, word1, word2):
         score = 0
-        for sentence in self.measure.divide_into_senteces():
+        for sentence in self.sentences:
             if ' %s ' % word1 in sentence:
                 if ' %s ' % word2 in sentence.replace(word1, ''):
                     score += 1
@@ -181,22 +178,43 @@ class _KeyGraph(nx.Graph):
 
 
 
-def find_keywords(text, debug = False):
+def _fetch_high_freq(finder, fetch_num):
+    # find some high frequency words
+    words = finder.find_words()
+    words = sorted(words, key=lambda x: x[1], reverse = True)
+    return [w for w, count in words[:fetch_num]]
+
+
+def _calculate_collocations(keygraph, words):
+    # calculate collocation of each words
+    co = []
+    for i, item in enumerate(words):
+        for j in range(i + 1, len(words)):
+            co.append((item, words[j], keygraph.co(item, words[j])))
+    # filter by frequency of collocation
+    co = [item for item in co if item[2] > 0]
+    # order by frequency
+    return sorted(co, key=lambda x: x[2], reverse=True)
+
+
+def detect_topics(text, fetch_num = 5, debug = False):
     
-    measure = _Measure(text)
-    keygraph = _KeyGraph(measure)
+    finder = _Finder(text)
+    keygraph = _KeyGraph(text)
     
-    words = [w for w, count in measure.find_high_freq()]
+    # fetch high frequency words
+    words = _fetch_high_freq(finder, FETCH_FREQ_NUM)
     for w in words:
         keygraph.add_node(w)
     
-    co = keygraph.calculate_collocations(words)
-    co = [item for item in co if item[2] > 1]
+    # calculate collocations of each high frequency words
+    co = _calculate_collocations(keygraph, words)
     for edge in co:
         keygraph.add_edge(edge[0], edge[1])
     keygraph.prune_week_edges()
     
-    keys = keygraph.high_key(words, 12)
+    # fetch words have strong relation with their foundations
+    keys = keygraph.high_key(words, FETCH_HIGH_KEY_NUM)
     for key in keys:
         keygraph.add_node(key[0])
     words1 = [word for word, count in keys]
@@ -213,32 +231,30 @@ def find_keywords(text, debug = False):
     
     for edge in columns:
         if edge[2] > 0:
-            keygraph.add_edge(edge[0], edge[1], color='red')
+            keygraph.add_edge(edge[0], edge[1])
     keygraph.prune_week_edges()
     
     columns = [(word, sum([score for w1, w2, score in columns if w1 is word])) for word in words1]\
             + [(word, sum([score for w1, w2, score in columns if w2 is word])) for word in words2]
     
-    keywords = defaultdict(int)
+    topics = defaultdict(int)
     for word1 in list(set(words1 + words2)):
         for word2, score in columns:
             if word1 is word2:
-                keywords[word1] += score
-    
-    keywords = sorted(keywords.items(), key=lambda x: x[1], reverse = True)
+                topics[word1] += score
     
     if debug:
         keygraph.draw()
     
-    # return [('word1', 'score1'), ('word2', 'score2')...]
-    return keywords[:10]
+    # sorted by their score
+    topics = sorted(topics.items(), key=lambda x: x[1], reverse = True)
     
-    
-    
+    return [w for w, score in topics[:fetch_num]]
+
 
 def main():
-    text = open('sample.txt', 'r').read()
-    pprint(find_keywords(text))
+    text = open('data/txt/sample.txt', 'r').read()
+    pprint(detect_topics(text, 5))
 
 if __name__ == '__main__': main()
 

@@ -44,48 +44,37 @@ class ContentExtractor(object):
             return body
         return None
     
+    def highscore(self):
+        """
+            Return high score Layout Block
+        """
+        top = None
+        for item in self.decompose():
+            if not top:
+                top = item
+            elif top.score < item.score:
+                top = item
+        return top
+    
     def guessed_title(self):
         """
             Return the guessed title of the main content
         """
-        block   = self.decompose()
-        cluster = self.cluster(block)
-        for item in cluster:
-            factor = 1.0
-            continuous = 1.0
-            title, score = '', 0
-            if len(item.component) and block.index(item.component[0]) > 0:
-                n = range(0, block.index(item.component[0]) - 1)
-                n.reverse()
-                for b in [block[i] for i in n]:
-                    if len(title) > 0:
-                        continuous /= self.continuous_factor
-                    if len(b.text_with_strip()) == 0:
-                        continue
-                    factor *= self.decay_factor
-                    if b.title_score1(factor, continuous) > score:
-                        score = b.title_score1(factor, continuous)
-                        title = b.text_with_strip()
-            item.title = title
-        top = self.fetch_highscore(cluster)
+        top = self.highscore()
         return top.title
     
     def guessed_content(self):
         """
             Return the guessed main content of HTML document
         """
-        block   = self.decompose()
-        cluster = self.cluster(block)
-        top     = self.fetch_highscore(cluster)
+        top = self.highscore()
         return top.body
     
     def guessed_main_images(self):
         """
             Return candidate of main image
         """
-        block     = self.decompose()
-        cluster   = self.cluster(block)
-        top       = self.fetch_highscore(cluster)
+        top       = self.highscore()
         candidate = []
         for e in top.dom().xpath('//img'):
             candidate.append(e.attrib)
@@ -115,47 +104,38 @@ class ContentExtractor(object):
     
     def decompose(self):
         """
-            Return block are divided from HTML document.
+            Return cluster which is consist of layout blocks depending on thier score  from HTML document.
         """
-        # cache for performance
-        if not hasattr(self, '_decomposed'):
-            match = []
-            hx = ''
-            for m in [m for m in re.compile(r'<div.*?>|</div>|<(h.).*?>|</(h.)>', re.DOTALL).split(self.body()) if m]:
-                _m = None
-                if m:
-                    _m = re.compile('h.', re.DOTALL).match(m)
-                if _m:
-                    if hx == '':
-                        hx = '<%s>' % _m.group()
-                    else:
-                        match.append(hx + '</%s>' % _m.group())
-                        hx = ''
-                elif hx:
-                    hx += m
+        match = []
+        hx = ''
+        for m in [m for m in re.compile(r'<div.*?>|</div>|<(h.).*?>|</(h.)>', re.DOTALL).split(self.body()) if m]:
+            _m = None
+            if m:
+                _m = re.compile('h.', re.DOTALL).match(m)
+            if _m:
+                if hx == '':
+                    hx = '<%s>' % _m.group()
                 else:
-                    match.append(m)
-            block = []
-            for m in match:
-                # ignore content has only white spaces
-                if len(re.compile('\s').sub('', m)) > 0:
-                    try:
-                        b = _Block(m)
-                    except ParserError:
-                        block.append(_EmptyBlock())
-                    else:
-                        block.append(b)
-                else:
-                    # we can not ignore empty block
-                    # has to influence distance of layout block
+                    match.append(hx + '</%s>' % _m.group())
+                    hx = ''
+            elif hx:
+                hx += m
+            else:
+                match.append(m)
+        block = []
+        for m in match:
+            # ignore content has only white spaces
+            if len(re.compile('\s').sub('', m)) > 0:
+                try:
+                    b = _Block(m)
+                except ParserError:
                     block.append(_EmptyBlock())
-            self._decomposed = block
-        return self._decomposed
-    
-    def cluster(self, block):
-        """
-            Return cluster which is consist of layout blocks depending on thier score.
-        """
+                else:
+                    block.append(b)
+            else:
+                # we can not ignore empty block
+                # has to influence distance of layout block
+                block.append(_EmptyBlock())
         factor = 1.0
         continuous = 1.0
         nascent = _LayoutBlock()
@@ -179,19 +159,25 @@ class ContentExtractor(object):
                 factor = 1.0
                 continuous = self.continuous_factor
         cluster.append(nascent)
-        return cluster
-    
-    def fetch_highscore(self, cluster):
-        """
-            Return high score Layout Block
-        """
-        top = None
+        # calculate score of title
         for item in cluster:
-            if not top:
-                top = item
-            elif top.score < item.score:
-                top = item
-        return top
+            factor = 1.0
+            continuous = 1.0
+            title, score = '', 0
+            if len(item.component) and block.index(item.component[0]) > 0:
+                n = range(0, block.index(item.component[0]) - 1)
+                n.reverse()
+                for b in [block[i] for i in n]:
+                    if len(title) > 0:
+                        continuous /= self.continuous_factor
+                    if len(b.text_with_strip()) == 0:
+                        continue
+                    factor *= self.decay_factor
+                    if b.title_score1(factor, continuous) > score:
+                        score = b.title_score1(factor, continuous)
+                        title = b.text_with_strip()
+            item.title = title
+        return cluster
 
 
 class _LayoutBlock(object):

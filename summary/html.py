@@ -49,7 +49,7 @@ class ContentExtractor(object):
             Return high score Layout Block
         """
         top = None
-        for item in self.decompose():
+        for item in self.cluster():
             if not top:
                 top = item
             elif top.score < item.score:
@@ -74,11 +74,8 @@ class ContentExtractor(object):
         """
             Return candidate of main image
         """
-        top       = self.highscore()
-        candidate = []
-        for e in top.dom().xpath('//img'):
-            candidate.append(e.attrib)
-        return candidate
+        top = self.highscore()
+        return [item.attrib for item in top.dom().xpath('//img')]
     
     def topics(self):
         """
@@ -104,7 +101,7 @@ class ContentExtractor(object):
     
     def decompose(self):
         """
-            Return cluster which is consist of layout blocks depending on thier score  from HTML document.
+            Return block are divided from HTML document.
         """
         match = []
         hx = ''
@@ -136,17 +133,22 @@ class ContentExtractor(object):
                 # we can not ignore empty block
                 # has to influence distance of layout block
                 block.append(_EmptyBlock())
+        return block
+    
+    def cluster(self):
+        """
+            Return cluster which is consist of layout blocks depending on thier score  from HTML document.
+        """
         factor = 1.0
         continuous = 1.0
+        block = self.decompose()
         nascent = _LayoutBlock()
         cluster = []
         # calculate score of main content
         for b in block:
             if len(nascent.body) > 0:
                 continuous /= self.continuous_factor
-            if len(b.text_with_strip()) == 0:
-                continue
-            if len(b.text_without_link()) == 0:
+            if len(b.text_with_strip()) == 0 or len(b.text_without_link()) == 0:
                 continue
             factor *= self.decay_factor
             if b.score1(factor, continuous) > self.threshold:
@@ -229,7 +231,7 @@ class _Block(object):
     
     def text_with_strip(self):
         """
-            Return only text content removed tags.
+            Return tags removed text.
         """
         if self.dom() is not None:
             return self.dom().text_content().strip()
@@ -240,25 +242,25 @@ class _Block(object):
           Return text the links were removed.
         """
         # cache for performance
-        if hasattr(self, '_text_without_link'):
-           return  self._text_without_link
-        dom = self.dom(True)
-        if dom is None:
-            self._text_without_link = ''
-            return self._text_without_link
-        a_list = dom.xpath('//a')
-        a_count = len(a_list)
-        try:
-            for a in a_list:
-                a.drop_tree()
-        except AssertionError:
-            pass
-        # At least link-removed content has to have 20 charactors.
-        if len(re.compile('\s').sub('', dom.text_content())) < 20 * a_count or is_collection_of_links(self):
-            self._text_without_link = ''
-            return self._text_without_link
-        self._text_without_link = dom.text_content()
-        return self._text_without_link
+        if hasattr(self, 'cache'):
+            return  self.cache
+        self.cache = ''
+        dom = self.dom(deepcopy = True)
+        if dom is not None:
+            items = dom.xpath('//a')
+            # drop link from dom tree
+            for a in items:
+                try:
+                    a.drop_tree()
+                except AssertionError:
+                    pass
+            norm = re.compile('\s').sub('', dom.text_content())
+            # At least link-removed content has to have 20 charactors.
+            if len(norm) < 20 * len(items) or is_collection_of_links(self):
+                pass
+            else:
+                self.cache = dom.text_content()
+        return self.cache
     
     def score(self, factor):
         """

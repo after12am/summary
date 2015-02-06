@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import urllib, sys, difflib
-from extractor import extract
+from html import extract
 from datetime import datetime
 
 testcases = []
@@ -130,31 +130,6 @@ I soon found that controlling with the mouse was messing with the whole live fee
 Sometimes life is cool 
 
 So I’m slowly working my way to the music visualizer I had in mind (but the path is steep)..
-'''
-})
-
-testcases.append({
-'uri': u'http://www.dasprinzip.com/prinzipiell/2012/04/03/shaders-in-their-natural-habitat-episode-1/',
-'title': u'Shaders in their natural habitat. episode 1',
-'body': u'''
-Feels like ions of years have past since I wrote some´ here (shame on me for being such a lazy bum) - but finally…
-First of all, lotsa things changed during the last half year. Flash is dead… ehhhrrrr not so dead yet, HTML5 becomes the superperformant ‘jack of all trades device’ (oh yeah!) and WebGL runs on the IE (NOT). But seriously, personally I decided to give it a try and going freelance with my pet subject… a.k.a taking client-orders of projects that are in the need of Shaders (gimme gimme - frank [at] prinzipiell [dot] com).
-Programming ‘just’ Shaders, wtf !!! (you´d almost think…)
-But believe it or not, nowadays, it´s hardly not possible to imagine 3D-Engines/Games, programs or projects without the use of a single Shader. A Shader… what is it? To put it simply: Shaders are simple programs that describe the traits of either a vertex or a pixel (fragments). Shaders are used to program the graphics processing unit (GPU) programmable rendering pipeline and are used to primarily calculate rendering effects on graphics hardware with a high degree of flexibility.
-Fair enough, but lets specify a little scope of application: Back in the good old days graphics were done in software (Hello Flash10). This might be flexible as well, but is not really performant and not very efficient because the fixed pipeline is rather limited. Something as simple as Phong-Shading already requires a shader (the shading capabilities of the fixed pipeline end with Gouraud-Shading). The possibilities that open up with shaders are huge. Some of them are: better shadowing-techniques, ambient-occlusion, normal-mapping, etc. … in other words and to say it exaggerated (!!!) modern 3D/2D-Engines/Games would look a bit lame (not to say like crap) without Shaders.
-In my case, when I´ve some spare time left, I like to program more ‘experimental’ stuff with Shaders. Sound-reactive visualizations driven by WebGL f.e., like that little thingy here:
-
-Launch (needs an WebGL enabled browser)
-Or image processing stuff by combining Flash and Pixel Bender (Adobe´s ‘almost’ on GPU but in case Flash <11 on CPU shading solution):
-
-Launch
-Usually I don´t care for the language in which a Shader must be programmed (GLSL, HLSL, Pixel Bender shizzl or Assembler, sorry, I meant AGAL assembly source code for the use with Flash11), because it all depends on the target environment. When it comes to offline tasks, there are two top dogs to go for: The official OpenGL and OpenGL ES shading language is GLSL (OpenGL Shading Language), and the official Direct3D shading language is HLSL (High Level Shader Language). In case of online-usages for the internet, you can program GLSL based Shaders via WebGL for example… and, “um, errrrr…”, you could use Flash as a weapon of choice which now has GPU acceleration too (thank you Adobe, by nature the average Flash Developer likes to deal with Assembler code…).
-So, “Yes M´am…”  Shaders for 3D stuff and games, but when it comes to ‘real’ projects, Shaders can be more than helpful too, doing all that nifty tasks that need performance and speed. As an example, the ‘Samsung Notasso‘ campaign I was envolved in last winter. The nice people from the Amsterdam based agency Code D’Azur contacted me to write a bunch of Pixel Bender-based plugins to use with Flash for that project, that will do all the heavy and time-critical image processing stuff: Like automated face detection, automated cutting out detected faces from the image´s background and transform every single copy into a unique piece of art (kinda). Donkey work(!), ´cause cutting out faces automatically by preventing as much face-details as you can, a.k.a hairs, contours, neck a.s.o is not trivial at all, and doing this in Flash10 Pixel Bender non-GPU-accelerated truely IS madness… but in the end, manageable! We separated the Shader-tasks into two Plugins, one to be called ‘The Scanner’, which does all the face-detection and validation whether we detected a good face-shot or not. The second Plugin I called ‘The Composer’, which does all the hard work distributed on many little single Shader tasks (like one for edge-detection, one for skin prevention, one for the actual cut-out of the face, one for contour recovery, and many more…)
-You can give it a try here:
-
-Launch
-That´s it so far… the idea is to continue this article by giving you an extract from my last projects and works and to show the diverse usage of Shaders there. So this was ‘Episode 1‘ - up next… Shaders really like Dubstep, watch out!
-Edit: Wanna see and know more about Shaders? Me is doing a session at upcoming ‘Beyond Tellerrand‘ conference in Cologne (is the place to be) bringing along all new fresh stuff and experiments, so maybe see you there…
 '''
 })
 

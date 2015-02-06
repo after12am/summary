@@ -21,12 +21,15 @@ def tf(words, return_num=10):
     return items[:return_num]
 
 def idf():
-    # could not implement. When you want to implement idf, 
-    # it might be good to use google search.
+    # not implement. 
+    # If you want to implement idf, I recommend to use wiki database.
+    # see https://dumps.wikimedia.org/ 
     return 1
 
 def tfidf():
-    # could not implement. 
+    print "not implement.\n" 
+    print "If you want to implement idf, I recommend to use wiki database.\n" 
+    print "see https://dumps.wikimedia.org/\n"
     pass
 
 def main():

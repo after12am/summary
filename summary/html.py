@@ -60,22 +60,19 @@ class ContentExtractor(object):
         """
             Return the guessed title of the main content
         """
-        top = self.highscore()
-        return top.title
+        return self.highscore().title
     
     def guessed_content(self):
         """
             Return the guessed main content of HTML document
         """
-        top = self.highscore()
-        return top.body
+        return self.highscore().body
     
     def guessed_main_images(self):
         """
             Return candidate of main image
         """
-        top = self.highscore()
-        return [item.attrib for item in top.dom().xpath('//img')]
+        return [item.attrib for item in self.highscore().dom().xpath('//img')]
     
     def topics(self):
         """

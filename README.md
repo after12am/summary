@@ -9,7 +9,7 @@ I improved not to extract those as increasing of precision of calculating Layout
 And also Summary extracts not only main content but also appropriate title, even if being broken page.
 
 
-strategy is:
+## strategy
 
 ```
 1. removes the unnecessary elements from the web page.

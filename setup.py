@@ -8,6 +8,7 @@ setup(
     description = "Extractor to get main content from the web page.",
     author = "Satoshi Okami",
     author_email = "me.after.12am@gmail.com",
+    license = "MIT License",
     url = "https://github.com/after12am/summary",
     download_url = "https://github.com/after12am/summary/archive/master.zip",
     keywords = ["summary", "extract", "scraping", "web"],

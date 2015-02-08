@@ -4,7 +4,7 @@ setup(
     name = "summary",
     packages = ["summary"],
     version = "0.2.0",
-    install_requires = ["chardet", "lxml==2.3.5", "nltk", "numpy", "networkx"],
+    install_requires = ["chardet", "lxml", "nltk", "numpy", "networkx"],
     description = "Extractor to get main content from the web page.",
     author = "Satoshi Okami",
     author_email = "me.after.12am@gmail.com",

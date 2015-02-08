@@ -38,6 +38,7 @@ uri = 'web page you want to extract main text.'
 res = extract(urllib.urlopen(uri).read())
 print res['title'], '\n' # title of main content
 print res['body'], '\n' # main content
+print res['digest'], '\n' # guessed summarization
 print res['img'], '\n' # candidates of main images
 ```
 

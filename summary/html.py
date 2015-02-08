@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import sys, re, copy, urllib
 import lxml.html
+import digest
 from lxml.etree import ParserError
 from charset import to_unicode, to_unicode_if_htmlentity
 
@@ -82,9 +83,10 @@ class ContentExtractor(object):
     
     def summarize(self):
         """
-           Return digest of HTML document.
+           Return guessed digest of HTML document.
         """
-        pass
+        summarized = digest.summarize(self.guessed_content())
+        return ''.join(summarized['top_n_summary'])
     
     def summary(self):
         """
@@ -93,6 +95,7 @@ class ContentExtractor(object):
         return dict(
             title = self.guessed_title(),
             body = self.guessed_content(),
+            digest = self.summarize(),
             img = self.guessed_main_images()
         )
     
@@ -359,6 +362,7 @@ def main():
     extractor = ContentExtractor(document)
     print extractor.guessed_title(), "\n"
     print extractor.guessed_content(), "\n"
+    print extractor.summarize(), "\n"
     print extractor.summary(), "\n"
     print extract(document), "\n"
     

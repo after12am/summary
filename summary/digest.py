@@ -5,24 +5,19 @@ import nltk
 import numpy
 from pprint import pprint
 
-# words num
-N = 100
-
-# distance of words
-CLUSTER_THRESHOLD = 5
-
-# summurized sentences num
-TOP_SENTENCES = 5
-
+N = 100 # words num
+CLUSTER_THRESHOLD = 5 # distance of words
+TOP_SENTENCES = 5 # summurized sentences num
 
 def _score_sentences(sentences, important_words):
     scores = []
     sentence_idx = -1
-
+    
     for s in [nltk.tokenize.word_tokenize(s) for s in sentences]:
+        
         sentence_idx += 1
         word_idx = []
-
+        
         for w in important_words:
             try:
                 # compute position of important word in this sentence
@@ -30,15 +25,15 @@ def _score_sentences(sentences, important_words):
             except ValueError, e:
                 # not include w in this sentence
                 pass
-
-        word_idx.sort()
-
-        # not include important word at all
-        if len(word_idx) == 0: continue
-
-        # 単語のインデックスを使って２つの連続する単語に大して
-        # 最大距離のしきい値を使ってクラスタを計算する
         
+        word_idx.sort()
+        
+        # not include important word at all
+        if len(word_idx) == 0:
+            continue
+        
+        # Calculate the cluster using the threshold of maximum distance
+        # for two consecutive words with an index of words
         clusters = []
         cluster = [word_idx[0]]
         i = 0
@@ -50,16 +45,15 @@ def _score_sentences(sentences, important_words):
                 cluster = [word_idx[i]]
             i += 1
         clusters.append(cluster)
-
-        # 各クラスタのスコアを計算。クラスタのスコアの最大値がその文のスコア
-
+        
+        # calculates a score for each cluster.
+        # The maximum score of the cluster is the score for the statement.
         max_cluster_score = 0
         for c in clusters:
             significant_words_in_cluster = len(c)
             total_words_in_cluster = c[-1] - c[0] + 1
             score = 1.0 * significant_words_in_cluster * \
                 significant_words_in_cluster / total_words_in_cluster
-
             if score > max_cluster_score:
                 max_cluster_score = score
         scores.append((sentence_idx, score))
@@ -69,26 +63,24 @@ def _score_sentences(sentences, important_words):
 def summarize(text):
     sentences = [s.strip() for s in nltk.tokenize.sent_tokenize(text)]
     normalized_sentences = [s.lower() for s in sentences]
-
+    
     words = [w.lower() for sentence in normalized_sentences \
         for w in nltk.tokenize.word_tokenize(sentence) if len(w) > 2]
     
     fdist = nltk.FreqDist(words)
-
+    
     top_n_words = [w[0] for w in fdist.items() \
         if w[0] not in nltk.corpus.stopwords.words('english')][:N]
-
+    
     scored_sentences = _score_sentences(normalized_sentences, top_n_words)
-
-
+    
     avg = numpy.mean([s[1] for s in scored_sentences])
     std = numpy.std([s[1] for s in scored_sentences])
-    mean_scored = [(sent_idx, score) for (sent_idx, score) in scored_sentences \
-        if score > avg + 0.5 * std]
-
+    mean_scored = [(sent_idx, score) for (sent_idx, score) in scored_sentences if score > avg + 0.5 * std]
+    
     top_n_scored = sorted(scored_sentences, key=lambda s: s[1])[-TOP_SENTENCES:]
     top_n_scored = sorted(top_n_scored, key=lambda s: s[0])
-
+    
     return dict(top_n_summary = [sentences[idx] for (idx, score) in top_n_scored], \
             mean_scored_summary = [sentences[idx] for (idx, score) in mean_scored])
 

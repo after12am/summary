@@ -25,12 +25,13 @@ setup(
     long_description = """\
 
 Extractor to get main content from the web page.
- - title
- - body
- - candidates of main image
+ - guessed title of main content
+ - guessed main content
+ - guessed summarization
+ - candidate of main image
 
 Install
-   sudo easy_install "summary==0.1.1"
+   sudo easy_install summary
 
 Usages
    visit at https://github.com/after12am/summary

@@ -25,7 +25,7 @@ And also Summary extracts not only main content but also appropriate title, even
 I prepare easy install way. Run the following command in your new terminal.
 
 ```
-sudo easy_install "summary==0.1.1"
+sudo easy_install summary
 ```
 
 ## Prepare

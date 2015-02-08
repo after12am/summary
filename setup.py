@@ -3,7 +3,7 @@ from distutils.core import setup
 setup(
     name = "summary",
     packages = ["summary"],
-    version = "0.1.1",
+    version = "0.2.0",
     install_requires = ["chardet", "lxml==2.3.5", "nltk", "numpy", "networkx"],
     description = "Extractor to get main content from the web page.",
     author = "Satoshi Okami",

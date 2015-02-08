@@ -28,6 +28,16 @@ I prepare easy install way. Run the following command in your new terminal.
 sudo easy_install "summary==0.1.1"
 ```
 
+## Prepare
+
+run the following and download `punkt` package and `stopwords` corpora.
+
+```
+$ python
+>>> import nltk
+>>> nltk.download() 
+```
+
 ## Usage
 
 Here is how you get summary from the web page.

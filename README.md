@@ -36,10 +36,10 @@ Here is how you get summary from the web page.
 from summary import extract
 uri = 'web page you want to extract main text.'
 res = extract(urllib.urlopen(uri).read())
-print res['title'], '\n' # title of main content
-print res['body'], '\n' # main content
+print res['title'], '\n' # guessed title of main content
+print res['body'], '\n' # guessed main content
 print res['digest'], '\n' # guessed summarization
-print res['img'], '\n' # candidates of main images
+print res['img'], '\n' # candidate of main images
 ```
 
 Here shows the way to override the noise filters of extractor module. Use these overriding in response to your necessary. 

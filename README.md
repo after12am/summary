@@ -30,7 +30,7 @@ sudo easy_install summary
 
 ## Prepare
 
-run the following and download `punkt` package and `stopwords` corpora.
+Run the following and download `punkt` package and `stopwords` corpora.
 
 ```
 $ python

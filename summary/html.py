@@ -45,35 +45,23 @@ class _ContentExtractor(object):
             return body
         return None
     
-    def highscore(self):
-        """
-            Return high score Layout Block
-        """
-        top = None
-        for item in self.cluster():
-            if not top:
-                top = item
-            elif top.score < item.score:
-                top = item
-        return top
-    
     def guessed_title(self):
         """
             Return the guessed title of the main content
         """
-        return self.highscore().title
+        return self.cluster().highscore.title
     
     def guessed_content(self):
         """
             Return the guessed main content of HTML document
         """
-        return self.highscore().body
+        return self.cluster().highscore.body
     
     def guessed_main_images(self):
         """
             Return candidate of main image
         """
-        return [item.attrib for item in self.highscore().dom().xpath('//img')]
+        return [item.attrib for item in self.cluster().highscore.dom().xpath('//img')]
     
     def topics(self):
         """
@@ -143,7 +131,7 @@ class _ContentExtractor(object):
         continuous = 1.0
         block = self.decompose()
         nascent = _LayoutBlock()
-        cluster = []
+        cluster = _cluster()
         # calculate score of main content
         for b in block:
             if len(nascent.body) > 0:
@@ -180,6 +168,29 @@ class _ContentExtractor(object):
                         title = b.text_with_strip()
             item.title = title
         return cluster
+
+
+class _cluster(list):
+    
+    """
+        List of LayoutBlock
+    """
+    
+    def __init__(self, *arg):
+        list.__init__(self, arg)
+    
+    @property
+    def highscore(self):
+        """
+            Return high score Layout Block
+        """
+        top = None
+        for item in self:
+            if not top:
+                top = item
+            elif top.score < item.score:
+                top = item
+        return top
 
 
 class _LayoutBlock(object):

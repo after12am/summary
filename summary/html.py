@@ -6,7 +6,7 @@ from lxml.etree import ParserError
 from charset import to_unicode, to_unicode_if_htmlentity
 
 
-class ContentExtractor(object):
+class _ContentExtractor(object):
     
     IGNORE_TAGS = ['script', 'noscript', 'style', 'iframe', 'select']
     
@@ -322,7 +322,7 @@ def not_body_rate(block):
     return 0
 
 def extract(document):
-    extractor = ContentExtractor(document)
+    extractor = _ContentExtractor(document)
     return extractor.summary()
 
 def main():
@@ -359,7 +359,7 @@ def main():
     </body>
     </html>
     '''
-    extractor = ContentExtractor(document)
+    extractor = _ContentExtractor(document)
     print extractor.guessed_title(), "\n"
     print extractor.guessed_content(), "\n"
     print extractor.summarize(), "\n"

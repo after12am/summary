@@ -14,7 +14,7 @@ class TestDecodeEntities(unittest.TestCase):
 class TestDetectEncoding(unittest.TestCase):
     
     def setUp(self):
-        self.text1 = '''
+        self.encoding_located_in_charset = '''
         <!DOCTYPE HTML>
         <html lang="en">
         <head>
@@ -25,8 +25,7 @@ class TestDetectEncoding(unittest.TestCase):
         </body>
         </html>
         '''
-        
-        self.text2 = '''
+        self.encoding_located_in_content = '''
         <!DOCTYPE HTML>
         <html lang="en">
         <head>
@@ -37,12 +36,10 @@ class TestDetectEncoding(unittest.TestCase):
         </body>
         </html>
         '''
-        
-        self.text3 = '''
+        self.not_html_document = '''
         Not HTML document
         '''
-        
-        self.text4 = '''
+        self.no_specified_encoding = '''
         <!DOCTYPE HTML>
         <html lang="en">
         <head>
@@ -53,22 +50,22 @@ class TestDetectEncoding(unittest.TestCase):
         </html>
         '''
     
-    def test_detect_text_1(self):
-        encoding = detect_charset(self.text1)
+    def test_encoding_located_in_charset(self):
+        encoding = detect_charset(self.encoding_located_in_charset)
         self.assertEqual(encoding, 'utf-8')
     
-    def test_detect_text_2(self):
-        encoding = detect_charset(self.text2)
+    def test_encoding_located_in_content(self):
+        encoding = detect_charset(self.encoding_located_in_content)
         self.assertEqual(encoding, 'utf-8')
     
-    def test_detect_text_3(self):
+    def test_text_3(self):
         encoding = detect_charset(self.text3)
         self.assertEqual(encoding, None)
     
-    def test_detect_text_4_case_1(self):
-        encoding = detect_charset(self.text4)
+    def test_not_html_document(self):
+        encoding = detect_charset(self.not_html_document)
         self.assertEqual(encoding, None)
     
-    def test_detect_text_4_case_2(self):
-        encoding = detect_encoding(self.text4)
+    def test_no_specified_encoding(self):
+        encoding = detect_encoding(self.no_specified_encoding)
         self.assertEqual(encoding, 'ascii')

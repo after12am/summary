@@ -58,12 +58,12 @@ class TestDetectEncoding(unittest.TestCase):
         encoding = detect_charset(self.encoding_located_in_content)
         self.assertEqual(encoding, 'utf-8')
     
-    def test_text_3(self):
-        encoding = detect_charset(self.text3)
-        self.assertEqual(encoding, None)
-    
     def test_not_html_document(self):
         encoding = detect_charset(self.not_html_document)
+        self.assertEqual(encoding, None)
+    
+    def test_no_specified_encoding(self):
+        encoding = detect_charset(self.no_specified_encoding)
         self.assertEqual(encoding, None)
     
     def test_no_specified_encoding(self):

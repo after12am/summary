@@ -1,4 +1,2 @@
 chardet==2.2.1
 lxml==3.3.5
-nltk==2.0.4
-nose==1.3.1

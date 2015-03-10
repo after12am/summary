@@ -2,7 +2,7 @@
 import re
 import parser
 import cluster
-import urllib
+import urllib, urllib2
 from lxml.html import fromstring, tostring
 from html import drop_tree, drop_ignore_tag
 from char import detect_encoding, decode_entities, to_unicode
@@ -56,28 +56,25 @@ class Article(object):
 
 # function for fetching URLs for many schemes using a variety of different protocols.
 # instead of an 'http:', we can use 'ftp:', 'file:', etc.
-def _fetch(uri):
-    try:
-        response = urllib.urlopen(uri)
-        return response.read()
-    except HTTPError, e:
-        print 'The server couldn\'t fulfill the request.'
-        print 'Error code: ', e.code
-        print 'Reason: ', e.reason
-    except URLError, e:
-        print 'We failed to reach a server.'
-        print 'Error code: ', e.code
-        print 'Reason: ', e.reason
-    except IOError, e:
-        print 'We failed to fetch local file.'
-        print 'Error code: ', e.code
-        print 'Reason: ', e.reason
-    return None
-
-
-# main content extraction for many schemes
 def extract(html = None, uri = None, config = {}):
-    data = html or _fetch(uri = uri)
-    if data is None:
-        return None
+    data = html
+    if data is None and uri is not None:
+        try:
+            response = urllib.urlopen(uri)
+            data = response.read()
+        except urllib2.HTTPError, e:
+            print 'The server couldn\'t fulfill the request.'
+            print 'Error code: ', e.code
+            print 'Reason: ', e.reason
+            return None
+        except urllib2.URLError, e:
+            print 'We failed to reach a server.'
+            print 'Error code: ', e.code
+            print 'Reason: ', e.reason
+            return None
+        except IOError, e:
+            print 'We failed to fetch local file.'
+            print 'Error code: ', e.code
+            print 'Reason: ', e.reason
+            return None
     return Article(data)

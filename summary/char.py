@@ -8,6 +8,7 @@ __regx_reference = re.compile(u'&(#x?[0-9a-f]+|[a-z]+);', re.IGNORECASE)
 __regx_num16     = re.compile(u'#x\d+', re.IGNORECASE)
 __regx_num10     = re.compile(u'#\d+', re.IGNORECASE)
 
+# detect encoding from HTML charset
 def detect_charset(text):
     dom = lxml.html.fromstring(text.lower())
     for meta in dom.xpath('//meta[@charset]'):
@@ -20,6 +21,8 @@ def detect_charset(text):
                 return encoding[0].strip()
     return None
 
+
+# encoding detection corresponding to multiple formats (TEXT / HTML).
 def detect_encoding(text):
     # process the text as HTML format
     encoding = detect_charset(text)
@@ -27,6 +30,8 @@ def detect_encoding(text):
         encoding = chardet.detect(text)['encoding']
     return encoding
 
+
+# decodes escaped HTML entities (&amp; lt;) to unicode
 def decode_entities(text):
     ss = u''
     i  = 0
@@ -46,8 +51,9 @@ def decode_entities(text):
             ss += unichr(int(name[1:]))
     return ss
 
-# def to_unicode(text):
-#     encoding = detect_encoding(text)
-#     if encoding:
-#         return unicode(text, encoding, 'replace')
-#     return None
+# unicode if input text is str
+def to_unicode(text):
+    if type(text) is str:
+        encoding = detect_encoding(text)
+        return unicode(text, encoding, 'replace')
+    return text

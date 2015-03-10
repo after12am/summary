@@ -1,13 +1,60 @@
 # coding: utf-8
 import re
-import defs
 import parser
 import cluster
 import urllib
-import lxml.html
-from char import detect_encoding, decode_entities
+from lxml.html import fromstring, tostring
+from html import drop_tree, drop_ignore_tag
+from char import detect_encoding, decode_entities, to_unicode
 
-def fetch(uri):
+# extraction of main content which garbage has been removed
+class Article(object):
+    
+    def __init__(self, html):
+        self.html = html
+    
+    def __repr__(self):
+        name = self.__class__.__name__
+        if len(content) > 40:
+            return '<%s content=\'%s\'>' % (name, content[:40] + '...')
+        return '<%s content=\'%s\'>' % (name, content[:40])
+    
+    @property
+    def body(self):
+        return _fetch_cleaned_body(self.html)
+    
+    @property
+    def guessed_title(self):
+        pass
+    
+    @property
+    def guessed_text(self):
+        content = self.content.strip()
+        if content != u'':
+            text = fromstring(content).text_content()
+            return to_unicode(text)
+        return u''
+    
+    @property
+    def guessed_content(self):
+        sects = parser.decompose(self.body)
+        clusts = cluster.lbcluster(sects)
+        clusts.sort(cmp=lambda a,b: cmp(b.points, a.points))
+        best = clusts[0]
+        return decode_entities(best.body)
+    
+    @property
+    def guessed_digest(self):
+        pass
+    
+    @property
+    def guessed_images(self):
+        pass
+
+
+# function for fetching URLs for many schemes using a variety of different protocols.
+# instead of an 'http:', we can use 'ftp:', 'file:', etc.
+def _fetch(uri):
     try:
         response = urllib.urlopen(uri)
         return response.read()
@@ -25,34 +72,16 @@ def fetch(uri):
         print 'Reason: ', e.reason
     return None
 
-def drop_body_tag(body):
-    body = lxml.html.tostring(body)
-    return re.compile(r'<body>|</body>').sub(u'', body)
 
-def highscore(clusts):
-    clusts.sort(cmp=lambda a,b: cmp(b.score, a.score))
-    return clusts[0]
+def _fetch_cleaned_body(html):
+    dom = fromstring(html)
+    dom = drop_ignore_tag(dom)
+    return to_unicode(tostring(dom.body))
 
+
+# main content extraction for many schemes
 def extract(html = None, uri = None, config = {}):
-    
-    data = html or fetch(uri = uri)
+    data = html or _fetch(uri = uri)
     if data is None:
-        return False
-    
-    if type(data) is str:
-        encoding = detect_encoding(data)
-        data     = unicode(data, encoding, 'replace')
-    
-    dom = lxml.html.fromstring(data)
-    
-    for tag in defs.ignore_tags:
-        for e in dom.xpath('//%s' % tag):
-            e.drop_tree()
-    
-    body = drop_body_tag(dom.body)
-    sections = parser.decompose(body)
-    clusts = cluster.lbcluster(sections)
-    best = highscore(clusts)
-    
-    # &lt;b&gt;bold&lt;/b&gt;
-    return decode_entities(best.text)
+        return None
+    return Article(data)

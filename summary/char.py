@@ -20,12 +20,12 @@ def detect_charset(text):
 
 
 # charset in content attr of meta
-def detect_content_charset():
+def detect_charset_in_content(text):
+    dom = lxml.html.fromstring(text.lower())
     for meta in dom.xpath('//meta[@content]'):
-        if meta.get('content'):
-            encoding = __regx_charset.findall(meta.get('content'))
-            if encoding:
-                return encoding[0].strip()
+        encoding = __regx_charset.findall(meta.get('content'))
+        if encoding:
+            return encoding[0].strip()
     return None
 
 
@@ -34,7 +34,7 @@ def detect_encoding(text):
     # process the text as HTML format
     encoding = detect_charset(text)
     if encoding is None:
-        encoding = detect_content_charset(text)
+        encoding = detect_charset_in_content(text)
     if encoding is None:
         encoding = chardet.detect(text)['encoding']
     return encoding

@@ -46,8 +46,8 @@ def decode_entities(text):
             ss += unichr(int(name[1:]))
     return ss
 
-def to_unicode(text):
-    encoding = detect_encoding(text)
-    if encoding:
-        return unicode(text, encoding, 'replace')
-    return None
+# def to_unicode(text):
+#     encoding = detect_encoding(text)
+#     if encoding:
+#         return unicode(text, encoding, 'replace')
+#     return None

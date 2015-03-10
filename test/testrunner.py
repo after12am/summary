@@ -1,5 +1,5 @@
 import unittest
-from test_text import *
+from test_char import *
 
 if __name__ == '__main__':
     unittest.main()

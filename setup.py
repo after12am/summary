@@ -5,12 +5,12 @@ sys.path.append('./test')
 from distutils.core import setup
 from setuptools import setup
 
-description = """
+description = """\
 Extractor to get main content from the web page.
-- guessed title of main content
-- guessed main content
-- guessed summarization
-- candidate of main image
+ - guessed title of main content
+ - guessed main content
+ - guessed summarization
+ - candidate of main image
 
 Install
 sudo easy_install summary

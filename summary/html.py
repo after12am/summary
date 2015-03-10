@@ -12,10 +12,9 @@ def drop_tag(html, tag):
 def drop_tree(dom, tag):
     for e in dom.xpath('//%s' % tag):
         e.drop_tree()
-    return dom
 
 
 def drop_ignore_tag(dom):
     for tag in defs.ignore_tags:
         drop_tree(dom, tag)
-    return dom
+

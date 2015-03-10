@@ -21,7 +21,9 @@ class Article(object):
     
     @property
     def body(self):
-        return _fetch_cleaned_body(self.html)
+        dom = fromstring(self.html)
+        drop_ignore_tag(dom)
+        return to_unicode(tostring(dom.body))
     
     @property
     def guessed_title(self):
@@ -71,12 +73,6 @@ def _fetch(uri):
         print 'Error code: ', e.code
         print 'Reason: ', e.reason
     return None
-
-
-def _fetch_cleaned_body(html):
-    dom = fromstring(html)
-    dom = drop_ignore_tag(dom)
-    return to_unicode(tostring(dom.body))
 
 
 # main content extraction for many schemes

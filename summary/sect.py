@@ -2,7 +2,7 @@
 import re
 from lxml.html import fromstring
 
-class section(object):
+class block(object):
     
     def __init__(self, body):
         self.body = body
@@ -23,14 +23,10 @@ class section(object):
         return len(re.compile(r'<a.*?>.*?</a>', re.DOTALL).findall(self.body))
 
 
-class block(section):
-    pass
-
-
-class empty(section):
+class empty(block):
     
     def __init__(self):
-        section.__init__(self, u'')
+        block.__init__(self, u'')
     
     def __repr__(self):
         return '<%s>' % self.__class__.__name__

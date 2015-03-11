@@ -4,7 +4,7 @@ import parser
 import cluster
 import urllib, urllib2
 from lxml.html import fromstring, tostring
-from html import drop_tree, drop_ignore_tag
+from html import drop_tree, drop_ignore_trees
 from char import detect_encoding, decode_entities, to_unicode
 
 # extraction of main content which garbage has been removed
@@ -22,7 +22,7 @@ class Article(object):
     @property
     def body(self):
         dom = fromstring(self.html)
-        drop_ignore_tag(dom)
+        drop_ignore_trees(dom)
         return to_unicode(tostring(dom.body))
     
     @property
@@ -41,9 +41,9 @@ class Article(object):
     def guessed_content(self):
         sects = parser.decompose(self.body)
         clusts = cluster.lbcluster(sects)
-        clusts.sort(cmp=lambda a,b: cmp(b.points, a.points))
+        clusts.sort(cmp=lambda a,b: cmp(b['points'], a['points']))
         best = clusts[0]
-        return decode_entities(best.body)
+        return decode_entities(best['body'])
     
     @property
     def guessed_digest(self):
@@ -78,3 +78,4 @@ def extract(html = None, uri = None, config = {}):
             print 'Reason: ', e.reason
             return None
     return Article(data)
+

@@ -1,5 +1,5 @@
-from _html import not_body_rate
-from _html import extract
+from cluster import not_body_rate
+from extractor import extract
 
 
 # we expect you to override in response to necessary.

@@ -59,7 +59,7 @@ class TestDetectEncoding(unittest.TestCase):
         assert encoding == 'utf-8'
     
     def test_html_content_encoding_detection(self):
-        encoding = detect_charset(encoding_located_in_content)
+        encoding = detect_charset_in_content(encoding_located_in_content)
         assert encoding == 'utf-8'
     
     def test_text_format_encoding_detection(self):

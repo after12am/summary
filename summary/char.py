@@ -8,7 +8,6 @@ __regx_reference = re.compile(u'&(#x?[0-9a-f]+|[a-z]+);', re.IGNORECASE)
 __regx_num16     = re.compile(u'#x\d+', re.IGNORECASE)
 __regx_num10     = re.compile(u'#\d+', re.IGNORECASE)
 
-
 # detect encoding from HTML charset
 def detect_charset(text):
     dom = lxml.html.fromstring(text.lower())

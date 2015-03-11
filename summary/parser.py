@@ -1,12 +1,11 @@
 # encoding: utf-8
 import re
 from sect import block, empty
-from html import drop_tag
+from html.regx import drop_tag
 
+# decomposes HTML document into sections, which are layout blocks and empty blocks, 
+# according to block level elements
 def decompose(body):
-    """
-        Return decomposed sections from HTML document according to block level elements
-    """
     # drop body tag if exist and strip
     body = drop_tag(body, u'body').strip()
     match = []

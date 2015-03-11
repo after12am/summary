@@ -1,7 +1,6 @@
 # encoding: utf-8
 import re
 from lxml.html import fromstring
-from pprint import pprint
 
 # we expect you to override in response to necessary.
 # but need customize not necessarily.
@@ -11,6 +10,7 @@ def not_body_rate(sect):
     return 0
 
 
+# for scoring layout block according to the emergence position of its layout block
 def lbscore(sect, factor):
     text = sect.a_droped_text
     # At least link-removed content has to have 20 charactors.
@@ -23,6 +23,7 @@ def lbscore(sect, factor):
     return score
 
 
+# clusters continuous high score blocks
 def lbcluster(sects, score = lbscore, threshold = 100, continuous_factor = 1.62, decay_factor = .93):
     factor = 1.0
     continuous = 1.0
@@ -41,5 +42,4 @@ def lbcluster(sects, score = lbscore, threshold = 100, continuous_factor = 1.62,
             clusts.append({'sections': [sect], 'body': sect.body, 'points': points})
             continuous = continuous_factor
     return clusts
-
 

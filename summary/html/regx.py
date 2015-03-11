@@ -1,6 +1,9 @@
 # encoding: utf-8
 import re
-import defs
+
+def find_tag(html, tag):
+    return re.compile(r'<%s.*?>.*?</%s>' % (tag, tag), re.DOTALL).findall(html)
+
 
 # removes the tag, but keeps its children and text
 def drop_tag(html, tag):
@@ -12,13 +15,9 @@ def drop_tag(html, tag):
 
 
 # removes element from the tree, including its children and text
-def drop_tree(dom, tag):
-    for e in dom.xpath('%s' % tag):
-        e.drop_tree()
-
-
-# removes ignore elements with drop_tree()
-def drop_ignore_trees(dom):
-    for tag in defs.ignore_tags:
-        drop_tree(dom, tag)
-
+def drop_tree(html, tag):
+    if tag == '\s':
+        regx = re.compile(r'\s', re.DOTALL)
+    else:
+        regx = re.compile(r'<%s.*?>.*?</%s>' % (tag, tag), re.DOTALL)
+    return regx.sub(u'', html)

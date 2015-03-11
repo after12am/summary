@@ -4,7 +4,7 @@ import parser
 import cluster
 import urllib, urllib2
 from lxml.html import fromstring, tostring
-from html import drop_tree, drop_ignore_trees
+from html.dom import drop_tree, drop_ignore_trees
 from char import detect_encoding, decode_entities, to_unicode
 
 # extraction of main content which garbage has been removed

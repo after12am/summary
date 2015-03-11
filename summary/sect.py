@@ -1,7 +1,9 @@
 # encoding: utf-8
 import re
-from lxml.html import fromstring
+from html.regx import drop_tree, find_tag
+from html import unicoded_text_content
 
+# block level section
 class block(object):
     
     def __init__(self, body):
@@ -11,18 +13,24 @@ class block(object):
         return '<%s body=\'%s\'>' % (self.__class__.__name__, self.body)
     
     @property
+    def text(self):
+        # return tags removed text
+        return unicoded_text_content(self.body)
+    
+    @property
     def a_droped_text(self):
-        droped = re.compile(r'<a.*?>.*?</a>', re.DOTALL).sub(u'', self.body)
-        droped = re.compile(r'\s').sub(u'', droped)
+        droped = drop_tree(drop_tree(self.body, 'a'), '\s')
         if len(droped) == 0:
             return u''
-        return unicode(fromstring(droped).text_content().strip())
+        return unicoded_text_content(droped)
     
     @property
     def num_of_a(self):
-        return len(re.compile(r'<a.*?>.*?</a>', re.DOTALL).findall(self.body))
+        # return number of a tree
+        return len(find_tag(self.body, 'a'))
 
 
+# non block level section
 class empty(block):
     
     def __init__(self):

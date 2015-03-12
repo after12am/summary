@@ -44,20 +44,19 @@ def extract_guessed_title(html, continuous_factor = 1.62, decay_factor = .93):
         return False
     factor = 1.0
     continuous = 1.0
-    title = ''
-    points = 0
+    bestmatch = [u'', 0]
     items = sects[:sects.index(best.blocks[0])]
     items.reverse()
     for b in items:
-        if len(title) > 0:
+        if len(bestmatch[0]) > 0:
             continuous /= continuous_factor
         if len(b.text) == 0:
             continue
         factor *= decay_factor
-        if lbttlscore(b, factor) * continuous > points:
-            points = lbttlscore(b, factor) * continuous
-            title  = b.text
-    return title
+        if lbttlscore(b, factor) * continuous > bestmatch[1]:
+            bestmatch[0]  = b.text
+            bestmatch[1] = lbttlscore(b, factor) * continuous
+    return bestmatch[0]
 
 
 def extract_guessed_content(html):

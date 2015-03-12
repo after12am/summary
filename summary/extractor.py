@@ -4,6 +4,7 @@ import defs
 import parser
 import cluster
 import urllib, urllib2
+from cluster import lbttlscore
 from lxml.html import fromstring, tostring
 from html import text_content
 from html.regx import drop_tree
@@ -33,20 +34,6 @@ def extract_normed_body(html):
 
 # extraction of main content which garbage has been removed
 def extract_guessed_title(html, continuous_factor = 1.62, decay_factor = .93):
-    
-    def score(b, factor):
-        # calculate title score
-        # define 40 as title regular length
-        text = re.compile('\s').sub('', b.text)
-        if not len(text):
-            return 0
-        score = (factor / len(b.text)) * 100
-        m = re.compile(r'<h([1-6]).*?>', re.DOTALL).match(b.body)
-        if m:
-            # h1 - h6
-            score *= float(6.0 / float(m.groups()[0])) * 4.63
-        return score
-    
     sects = parser.decompose(extract_normed_body(html))
     clusts = cluster.lbcluster(sects)
     # sorting cluster by their score
@@ -67,8 +54,8 @@ def extract_guessed_title(html, continuous_factor = 1.62, decay_factor = .93):
         if len(b.text) == 0:
             continue
         factor *= decay_factor
-        if score(b, factor) * continuous > points:
-            points = score(b, factor) * continuous
+        if lbttlscore(b, factor) * continuous > points:
+            points = lbttlscore(b, factor) * continuous
             title  = b.text
     return title
 

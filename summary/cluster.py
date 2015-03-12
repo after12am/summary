@@ -24,6 +24,21 @@ def lbscore(block, factor):
     return score
 
 
+# for scoring title according to the emergence position and header element
+def lbttlscore(block, factor):
+    # calculate title score
+    # define 40 as title regular length
+    text = re.compile('\s').sub('', block.text)
+    if not len(text):
+        return 0
+    score = (factor / len(block.text)) * 100
+    m = re.compile(r'<h([1-6]).*?>', re.DOTALL).match(block.body)
+    if m:
+        # h1 - h6
+        score *= float(6.0 / float(m.groups()[0])) * 4.63
+    return score
+
+
 # clusters continuous high score blocks
 def lbcluster(blocks, score = lbscore, threshold = 100, continuous_factor = 1.62, decay_factor = .93):
     factor = 1.0

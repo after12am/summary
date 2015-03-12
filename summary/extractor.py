@@ -8,7 +8,6 @@ from cluster import lbttlscore
 from lxml.html import fromstring, tostring
 from html import text_content
 from html.regx import drop_tree
-# from html.dom import drop_tree, drop_ignore_trees
 from char import detect_encoding, decode_entities, to_unicode
 
 # removes ignore elements with drop_tree()
@@ -24,6 +23,7 @@ def extract_normed_body(html):
     # Note
     #  - html.dom.drop_ignore_trees() can not except ignore tags in case of “summary/test/resources/html/music-visualizer-progress.html“
     
+    # from html.dom import drop_tree, drop_ignore_trees
     # dom = fromstring(html)
     # dom = drop_ignore_trees(dom)
     # return to_unicode(tostring(dom.body))
@@ -32,7 +32,7 @@ def extract_normed_body(html):
     return to_unicode(tostring(dom.body))
 
 
-# extraction of main content which garbage has been removed
+# extracting title of main content
 def extract_guessed_title(html, continuous_factor = 1.62, decay_factor = .93):
     sects = parser.decompose(extract_normed_body(html))
     clusts = cluster.lbcluster(sects)
@@ -59,6 +59,7 @@ def extract_guessed_title(html, continuous_factor = 1.62, decay_factor = .93):
     return bestmatch[0]
 
 
+# extracting main content with tags
 def extract_guessed_content(html):
     sects = parser.decompose(extract_normed_body(html))
     clusts = cluster.lbcluster(sects)
@@ -70,6 +71,7 @@ def extract_guessed_content(html):
     return False
 
 
+# extracting main content without tags
 def extract_guessed_text(html):
     content = extract_guessed_content()
     if type(content) == unicode and len(content) > 0:
@@ -77,10 +79,12 @@ def extract_guessed_text(html):
     return False
 
 
+# extracting summarization of content
 def extract_guessed_digest(html):
     pass
 
 
+# extracting content images
 def extract_guessed_images(html):
     pass
 

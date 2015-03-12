@@ -3,7 +3,7 @@ import re
 from sect import block, empty
 from html.regx import drop_tag
 
-# decomposes HTML document into sections, which are layout blocks and empty blocks, 
+# decomposes HTML document into sections, including significant blocks and useless blocks, 
 # according to block level elements
 def decompose(body):
     # drop body tag if exist and strip

@@ -1,9 +1,9 @@
 # encoding: utf-8
 import re
 from html.regx import drop_tree, find_tag
-from html import unicoded_text_content
+from html import text_content
 
-# block level section
+# significant block section
 class block(object):
     
     def __init__(self, body):
@@ -15,14 +15,14 @@ class block(object):
     @property
     def text(self):
         # return tags removed text
-        return unicoded_text_content(self.body)
+        return text_content(self.body)
     
     @property
     def a_droped_text(self):
         droped = drop_tree(drop_tree(self.body, 'a'), '\s')
-        if len(droped) == 0:
-            return u''
-        return unicoded_text_content(droped)
+        if len(droped) > 0:
+            return text_content(droped)
+        return u''
     
     @property
     def num_of_a(self):
@@ -30,7 +30,7 @@ class block(object):
         return len(find_tag(self.body, 'a'))
 
 
-# non block level section
+# useless block section
 class empty(block):
     
     def __init__(self):
@@ -38,3 +38,23 @@ class empty(block):
     
     def __repr__(self):
         return '<%s>' % self.__class__.__name__
+
+
+class cluster(object):
+    
+    def __init__(self, blocks = [], points = 0):
+        self.blocks = blocks if type(blocks) == list else [blocks]
+        self.points = points
+    
+    @property
+    def body(self):
+        return '\n'.join([item.body for item in self.blocks])
+    
+    def append(self, block):
+        self.blocks.append(block)
+        return self
+    
+    def add_score(self, points):
+        self.points += points
+        return self
+

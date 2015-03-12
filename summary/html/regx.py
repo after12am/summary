@@ -1,5 +1,6 @@
 # encoding: utf-8
 import re
+from lxml.html import fromstring
 
 def find_tag(html, tag):
     return re.compile(r'<%s.*?>.*?</%s>' % (tag, tag), re.DOTALL).findall(html)
@@ -21,3 +22,4 @@ def drop_tree(html, tag):
     else:
         regx = re.compile(r'<%s.*?>.*?</%s>' % (tag, tag), re.DOTALL)
     return regx.sub(u'', html)
+

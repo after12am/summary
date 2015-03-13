@@ -124,5 +124,5 @@ def extract(html = None, uri = None, config = {}):
             print 'Error code: ', e.code
             print 'Reason: ', e.reason
             return False
-    return Article(data)
+    return Article(to_unicode(data))
 

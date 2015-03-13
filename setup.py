@@ -23,7 +23,7 @@ setup(
     name = "summary",
     packages = ["summary"],
     version = "0.2.0",
-    install_requires = ["chardet", "lxml", "nltk", "numpy", "networkx"],
+    install_requires = ["chardet", "lxml", "cssselect", "nltk", "numpy", "networkx"],
     description = "Extractor to get main content from the web page.",
     long_description = description,
     author = "Satoshi Okami",

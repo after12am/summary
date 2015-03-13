@@ -15,7 +15,11 @@ from char import detect_encoding, decode_entities, to_unicode
 def drop_ignore_trees(html):
     for tag in defs.ignore_tags:
         html = drop_tree(html, tag)
-    return html
+    dom = fromstring(html)
+    # remove blogs comments
+    for e in dom.cssselect("#comments,.comments"):
+        e.drop_tree()
+    return unicode(tostring(dom))
 
 
 # extract body element except useless tags

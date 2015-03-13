@@ -1,6 +1,8 @@
 Summary
 =======
 
+[![Build Status](https://travis-ci.org/after12am/summary.svg?branch=master)](https://travis-ci.org/after12am/summary)
+
 Summary is a python module to extract main content from the web page. 
 This was originally implemented by Nakatani Shuyo with ruby. 
 His strategy and implementation about extraction is great. But there is room for improvement. 

@@ -1,0 +1,437 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" id="sixapart-standard">
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+   <meta name="generator" content="Movable Type 3.33-ja" />
+
+   <link rel="stylesheet" href="http://labs.cybozu.co.jp/blog/nakatani/styles-site.css" type="text/css" />
+   <link rel="alternate" type="application/atom+xml" title="Atom" href="http://labs.cybozu.co.jp/blog/nakatani/atom.xml" />
+   <link rel="alternate" type="application/rss+xml" title="RSS 2.0" href="http://labs.cybozu.co.jp/blog/nakatani/index.xml" />
+
+   <title>Webページの本文抽出 (nakatani @ cybozu labs)</title>
+
+   <link rel="start" href="http://labs.cybozu.co.jp/blog/nakatani/" title="Home" />
+   <link rel="prev" href="http://labs.cybozu.co.jp/blog/nakatani/2007/09/web.html" title="Webページの自動カテゴライズ" />
+   <link rel="next" href="http://labs.cybozu.co.jp/blog/nakatani/2007/10/post_6.html" title="サイボウズ・ラボ 第５回テーマ発表会" />
+
+   <!--
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:trackback="http://madskills.com/public/xml/rss/module/trackback/"
+         xmlns:dc="http://purl.org/dc/elements/1.1/">
+<rdf:Description
+    rdf:about="http://labs.cybozu.co.jp/blog/nakatani/2007/09/web_1.html"
+    trackback:ping="http://labs.cybozu.co.jp/cgi-bin/mt-admin/mt-tbp.cgi/1517"
+    dc:title="Webページの本文抽出"
+    dc:identifier="http://labs.cybozu.co.jp/blog/nakatani/2007/09/web_1.html"
+    dc:subject="Pathtraq"
+    dc:description="Webページの自動カテゴライズ の続き。 前回書いたとおり、パストラックで行って..."
+    dc:creator=""
+    dc:date="2007-09-12T21:43:35+09:00" />
+</rdf:RDF>
+-->
+
+
+   
+   <script type="text/javascript" src="http://labs.cybozu.co.jp/blog/nakatani/mt-site.js"></script>
+<script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
+</script>
+<script type="text/javascript">
+_uacct = "UA-52354-4";
+urchinTracker();
+</script>
+</head>
+<body class="layout-two-column-right individual-entry-archive" onload="individualArchivesOnLoad(commenter_name)">
+   <div id="container">
+      <div id="container-inner" class="pkg">
+
+         <div id="banner">
+            <div id="banner-inner" class="pkg">
+               <h1 id="banner-header"><a href="http://labs.cybozu.co.jp/blog/nakatani/" accesskey="1">nakatani @ cybozu labs</a></h1>
+               <h2 id="banner-description"></h2>
+            </div>
+         </div>
+
+         <div id="pagebody">
+            <div id="pagebody-inner" class="pkg">
+               <div id="alpha">
+                  <div id="alpha-inner" class="pkg">
+
+                     <p class="content-nav">
+                        <a href="http://labs.cybozu.co.jp/blog/nakatani/2007/09/web.html">&laquo; Webページの自動カテゴライズ</a> |
+                        <a href="http://labs.cybozu.co.jp/blog/nakatani/">メイン</a>
+                        | <a href="http://labs.cybozu.co.jp/blog/nakatani/2007/10/post_6.html">サイボウズ・ラボ 第５回テーマ発表会 &raquo;</a>
+                     </p>
+
+
+                     <h2 id="archive-title">Webページの本文抽出</h2>
+                     <div class="entry" id="entry-1526">
+                        <div class="entry-content">
+                                                      <div class="entry-body">
+                              <a href="http://labs.cybozu.co.jp/blog/nakatani/2007/09/web.html">Webページの自動カテゴライズ</a> の続き。<br />
+前回書いたとおり、パストラックで行っている Web ページのカテゴライズでは、Web ページの本文抽出がひとつの鍵になっています。今回はその本文抽出モジュールを公開しつつ、使っている技法をざっくり解説などしてみます。<br />
+<br />
+<br />
+<div class="download">
+<a href="http://labs.cybozu.co.jp/blog/nakatani/downloads/extractcontent.rb">本文抽出モジュール ExtractContent ダウンロード</a><br>
+(右クリックして「名前をつけて保存」してください)</div>
+<br />
+本モジュールの利用は至極簡単。require して analyse メソッドに解析したい html を与えるだけ。文字コードは UTF-8 です。<br />
+【追記】大事なこと書き忘れ。本モジュールは Ruby1.8.5 で動作確認していますが、特別なことはしていないので、1.8.x なら動くと思います。<br />
+<br />
+<pre class="syntax-highlight"><span class="synIdentifier">$KCODE</span>=<span class="synSpecial">"</span><span class="synConstant">u</span><span class="synSpecial">"</span> <span class="synComment"># 文字コードは utf-8</span>
+<span class="synPreProc">require</span> <span class="synSpecial">'</span><span class="synConstant">extractcontent.rb</span><span class="synSpecial">'</span>
+
+<span class="synComment"># オプション値の指定</span>
+opt = {<span class="synIdentifier">:waste_expressions</span> =&gt; <span class="synSpecial">/</span><span class="synConstant">お問い合わせ|会社概要</span><span class="synSpecial">/</span>}
+<span class="synIdentifier">ExtractContent</span>::set_default(opt)
+
+html = <span class="synSpecial">''</span> <span class="synComment"># 解析対象 html </span>
+body, title = <span class="synIdentifier">ExtractContent</span>::analyse(html) <span class="synComment"># 本文抽出</span>
+</pre>
+<br />
+本文抽出時に使用するパラメータをオプション値として指定するようになっています。パラメータ値の簡単な説明はソース内に記述しています(すいません、ドキュメントが無くて)。<br />
+これらは微妙な増減で結果が大きく変わるので、waste_expressions や decay_factor, continuous_factor あたりを中心に対象とする html や処理に応じてあれこれ調節してみてください。<br />
+<br />
+<br />
+余談ですが、これまで大なり小なり色々なプログラムを作ってきてますが、実はライブラリの状態で公開するのはこれが初めて。正直、勝手がよくわかってません(苦笑)。<br />
+本モジュールのライセンスはひとまず BSD ライセンスとしますが、そんなわけで不都合のない範囲であれこれ変更させていただくようなこともあるかもしれません。あしからずご了承ください。<br />
+<br />
+<br />
+さて。<br />
+パストラックの本文抽出は大きく以下の方針で開発しています。<br />
+- 本文を抽出する、というより「本文以外を除外する」<br />
+- カテゴライズ精度の向上に寄与する方向でのチューニング。<br />
+- 実用本位。極力一般化するが、無理な範囲はプラグインでサイト別に各種ルールを記述。<br />
+プラグインでサイト別に記述する、なんてのは誰でも出来る話なので、以下で解説するのは一般的な html に対する本文抽出ロジックに関する工夫のあれこれです(公開したモジュールもちょうどその範囲)。<br />
+<br />
+まず、手を付けるに当たって参考にさせていただいたのが下記記事です。ありがとうございます。<br />
+<br />
+<dl>
+<dt>ブログの記事本文を抽出するスクリプトをつくってみた - zuzara</dt>
+<dd><a href="http://blog.zuzara.com/2006/06/06/84/" target="_blank">http://blog.zuzara.com/2006/06/06/84/</a></dd>
+<dt>ブログの本文抽出にチャレンジ - Ceekz Logs</dt>
+<dd><a href="http://private.ceek.jp/archives/002039.html" target="_blank">http://private.ceek.jp/archives/002039.html</a></dd>
+</dl>
+<br />
+正確にはこれらの記事を参考に<a href="http://labs.cybozu.co.jp/blog/kazuho/">奥さん</a>が作った本文抽出モジュール(Perl版) が社内に転がっていたので、そちらを参考にさせてもらったんですが(笑)。サイボウズ・ラボはそんなところです。はい。<br />
+<br />
+<br />
+そんなこんなで今回のモジュールで採った方式は下記の通り。<br />
+<br />
+- div, td で囲まれた範囲をテキストブロックとして取り出す<br />
+- 句読点の数をそのテキストブロックのベースのスコアとする<br />
+- リンクタグ以外のテキスト長の割合をスコアに反映<br />
+- 前半のブロックほどスコアが高くなるように傾斜（ここまでが参考にさせていただいた部分)<br />
+- 特にリンクリストを判定し、除外する方向でスコアに反映<br />
+- アフィリエイトリンク、フォーム、フッタ等に特有のキーワードが含まれていれば、除外する方向でスコアに反映<br />
+- スコアの高い連続ブロックをクラスタ化し、クラスタ間でさらにスコアの比較を行う<br />
+- (裏技) Google AdSense Section Target を考慮<br />
+<br />
+Web ページにはメニューとかヘッダーとかフッターとかプロフィールとか連絡先とかコメント欄とかトラックバックとか広告とか、とにかく本文以外の「ゴミ」がわんさかついているので、本文を抽出するというより「いかにゴミを取り除くか」に注力しています。<br />
+そういった「ゴミ」にはリンクが整列している場合が多いので、リンクリストを判定する方法を３通りほど用意して極力除外。<br />
+また広告はアフィリエイトの有無、コメントや検索はフォームの有無、フッターは特徴的な語句が含まれているかで判定できる可能性がある程度あるので、それらも判定。<br />
+語句を指定してしまうと当然ながら言語に依存してしまいますが、今回の目的はカテゴライズであり、そのフィルタは日本語に特化して学習しているので、パストラックのカテゴライズでは割り切って日本語の語句をびしばし指定して利用しています。<br />
+<br />
+<br />
+上にも書きましたように、コメントやトラックバックについても極力除外する方向で開発・チューニングしています。<br />
+これらを本文に含めるか含めないかは意見の分かれるところでしょうが、今回の目的はカテゴライズなので、それらはノイズだと判断しました(実際、コメント/トラックバックを含めてしまうと分類精度が落ちてしまうことがわかっています)。<br />
+逆に、全文検索のための本文抽出であればコメントやトラックバックも含めたいということも考えられますから、そこは本文抽出のロジックやチューニングに対してケースバイケースが求められる部分になるんじゃないかと思います。<br />
+<br />
+<br />
+また、評価の高いテキストブロックが連続している場合、それらをひとかたまりにして扱うようにしています。<br />
+本文に該当する部分が div や td で区切られてしまっていても(実際、写真の挿入や段組などのために区切られてしまうことが多々ある)、基本的にはそれらは連続していることを反映する形です。<br />
+これにより、本文の左右にある比較的文章量の多いテキストブロック(例えばアブストラクト付きの関連ページリンクなど)などを除外しています。<br />
+<br />
+<br />
+Ceekz さんの書かれていた、<br />
+<br />
+- 直前のエントリと diff を取る<br />
+- RSS の description と比較する<br />
+<br />
+あたりのアイデアにも興味はあったんですが、前者はコストが高く、後者は対象として非ブログの方が多いことが想定されたため費用対効果が低く、とりあえずスルー。<br />
+<br />
+<br />
+で、ここまででもカテゴライズを対象とした場合には実用レベルの本文抽出にたどり着けているのですが。<br />
+実は結構強力な裏技がありまして。<br />
+<br />
+<br />
+Google AdSense が表示する広告は、内容との関連性を高いほど広告効果も高まることが期待されるわけですが、それを支援するために <a href="https://www.google.com/adsense/support/bin/answer.py?hl=jp&answer=23168">セクションターゲット</a> という仕組みがあります。<br />
+これはページ内で「強調したいテキスト」を &lt;!-- google_ad_section_start --&gt; ～ &lt;!-- google_ad_section_end --&gt; などで囲うことで、Google AdSense が表示する広告と照合する際に考慮する、というもの。<br />
+それってなんて本文？　なわけで、セクションターゲットに対応しているサイトであれば 100% に近い精度で本文が抜けます。<br />
+とりあえず目立つ範囲だけでも asahi.com, livedoor, hatena, gigazine, nikkeibp, mycom, nikkansports, sponichi, fc2.com, atwiki などなどなどなど、かなり多くのサイトが対応しており、今後も増えていくことが予想され(この本文抽出モジュールを作り始めたときはセクションターゲット使ってなかったはずなのに、現在は使っているというサイトがいくつか)、裏技といいつつ本文抽出やるなら見逃せない。<br />
+本当に、お金の力は偉大やのう。<br />
+<br />
+<br />
+ちゃんと母集団を決めて統計をとったりまではしていないのであくまで感覚的な数字ですが、オプション値をチューニングして使えば、ニュース系のサイトの記事ページなら 95%～99% 程度は期待したとおりの本文が抽出できています。<br />
+ブログはやはり千差万別なため少し厳しいのですが、それでも 90% は超えているかと。<br />
+一方で、一覧系のページ(特にポータルトップ)はもともと本文と言える部分がないに等しく、それを「本文無し」と判定してくれれば御の字なのですが、やはりどうしてもゴミっぽいところを誤って抽出してしまうことはある程度発生してしまっています。そのあたりはまだ課題ですね～。
+
+                           </div>
+                           
+                                        
+                                                      <div class="entry-tags">
+                               <h4 class="entry-tags-header">タグ:</h4> 
+                               <ul class="entry-tags-list">
+                                                                          <li class="entry-tag"><a href="http://labs.cybozu.co.jp/cgi-bin/mt-admin/mt-search.cgi?tag=pathtraq&amp;blog_id=13" rel="tag">pathtraq</a></li>
+                                                                          <li class="entry-tag"><a href="http://labs.cybozu.co.jp/cgi-bin/mt-admin/mt-search.cgi?tag=%E6%9C%AC%E6%96%87%E6%8A%BD%E5%87%BA&amp;blog_id=13" rel="tag">本文抽出</a></li>
+                                   
+                               </ul>
+                           </div>
+                           
+                        </div>
+                        <p class="entry-footer">
+                           <span class="post-footers">
+                                                                  日時: 2007&#24180;09&#26376;12&#26085; 21:43
+                               
+                           </span> 
+                           <span class="separator">|</span> <a class="permalink" href="http://labs.cybozu.co.jp/blog/nakatani/2007/09/web_1.html">パーマリンク</a>
+                        </p>
+                     </div>
+
+                                          <div class="trackbacks">
+                        <h3 id="trackback" class="trackbacks-header">トラックバック</h3>
+                        <div id="trackbacks-info">
+                           <p>このエントリーのトラックバックURL: <br />http://labs.cybozu.co.jp/cgi-bin/mt-admin/mt-tbp.cgi/1517</p>
+                        </div>
+                                                                                 <div class="trackbacks-content">
+                              <p>この一覧は、次のエントリーを参照しています:  <a href="http://labs.cybozu.co.jp/blog/nakatani/2007/09/web_1.html" rel="nofollow">Webページの本文抽出</a>:</p>
+                           
+                           <a id="p2416824"></a>
+                           <div class="trackback" id="ping-2416824">
+                              <div class="trackback-content">
+                                 <p>
+                                    &raquo; <a href="http://stickstack.org/node/178" rel="nofollow nofollow">My Faves for Saturday, December 15, 2007</a> 送信元 stick stack<br />
+                                     <a href="http://stickstack.org/node/178" rel="nofollow nofollow">[詳しくはこちら]</a>
+                                 </p>
+                              </div>
+                              <p class="trackback-footer">
+                                 トラックバック時刻:  <a href="#ping-2416824" rel="nofollow">2007&#24180;12&#26376;16&#26085; 09:09</a>
+                              </p>
+                           </div>
+                           
+                                                   
+                           <a id="p3327751"></a>
+                           <div class="trackback" id="ping-3327751">
+                              <div class="trackback-content">
+                                 <p>
+                                    &raquo; <a href="https://systemfriend.co.jp/node/326" rel="nofollow nofollow">Web サイトの本文抽出を PHP で行う</a> 送信元 ソフトウェア開発の株式会社システムフレンド<br />
+                                    こんにちは高橋です。ひさびさです。ぺちぺで検索エンジンや類似文書の提示エンジンなどを作成していたのですが、普通の文書ではなくサイト等の場合、タグやヘッダ情... <a href="https://systemfriend.co.jp/node/326" rel="nofollow nofollow">[詳しくはこちら]</a>
+                                 </p>
+                              </div>
+                              <p class="trackback-footer">
+                                 トラックバック時刻:  <a href="#ping-3327751" rel="nofollow">2009&#24180;03&#26376;17&#26085; 13:05</a>
+                              </p>
+                           </div>
+                           
+                                                   
+                           <a id="p3522780"></a>
+                           <div class="trackback" id="ping-3522780">
+                              <div class="trackback-content">
+                                 <p>
+                                    &raquo; <a href="http://blog.mwsoft.jp/article/29147229.html" rel="nofollow nofollow">ブログの記事本文のみを取得する</a> 送信元 はぐれプログラマ清純派<br />
+                                    ExtractContentの実行結果の検証を簡易に行えるようなテスト用モジュールを作ってみました。 <a href="http://blog.mwsoft.jp/article/29147229.html" rel="nofollow nofollow">[詳しくはこちら]</a>
+                                 </p>
+                              </div>
+                              <p class="trackback-footer">
+                                 トラックバック時刻:  <a href="#ping-3522780" rel="nofollow">2009&#24180;05&#26376;15&#26085; 03:08</a>
+                              </p>
+                           </div>
+                                                         </div>
+                           
+                        
+                     </div>
+                     
+
+                                          <div id="comments" class="comments">
+                                                                                 <div class="comments-content">
+                                 <h3 class="comments-header">コメント (2)</h3>
+                           
+                                 <a id="c200524"></a>
+                                 <div class="comment" id="comment-200524">
+                                    <div class="comment-inner">
+                                       <div class="comment-header">
+                                          匿名:
+                                       </div>
+                                       <div class="comment-content">
+                                          <p>> 奥さんが作った本文抽出モジュール(Perl版) が社内に転がっていたので、</p>
+
+<p>Perl使いとしてはこちらの方が気になるのですが、公開の予定はないのでしょうか...。</p>
+                                       </div>
+                                       <p class="comment-footer">
+                                          投稿者:
+                                          匿名  |
+                                          <a href="#comment-200524">2007&#24180;11&#26376;01&#26085; 00:49</a>
+                                       </p>
+                                       <p class="comment-footer-experimental">
+                                          日時:
+                                          <a href="#comment-200524" title="このコメントへのパーマリンク">2007&#24180;11&#26376;01&#26085; 00:49</a>
+                                       </p>
+                                    </div>
+                                 </div>
+                           
+                                                   
+                                 <a id="c201265"></a>
+                                 <div class="comment" id="comment-201265">
+                                    <div class="comment-inner">
+                                       <div class="comment-header">
+                                          <a href="http://labs.cybozu.co.jp/blog/nakatani/" rel="nofollow">nakatani</a>:
+                                       </div>
+                                       <div class="comment-content">
+                                          <p>> 公開の予定はないのでしょうか...。</p>
+
+<p>もともとの Perl 版は Pathtraq のために必要だからちょっと作ってみたというものだったはず。<br />
+現在はこの Ruby 版の本モジュールが Pathtraq の本文抽出を担っていることもあり、Perl版の公開とかバージョンアップとかの予定はなさげです。<br />
+すいません（って中谷がいうことじゃないですがｗ）。</p>
+                                       </div>
+                                       <p class="comment-footer">
+                                          投稿者:
+                                          <a href="http://labs.cybozu.co.jp/blog/nakatani/" rel="nofollow">nakatani</a>  |
+                                          <a href="#comment-201265">2007&#24180;11&#26376;02&#26085; 17:05</a>
+                                       </p>
+                                       <p class="comment-footer-experimental">
+                                          日時:
+                                          <a href="#comment-201265" title="このコメントへのパーマリンク">2007&#24180;11&#26376;02&#26085; 17:05</a>
+                                       </p>
+                                    </div>
+                                 </div>
+                                                         </div>
+                           
+                        
+
+                         
+                        <form method="post" action="http://labs.cybozu.co.jp/cgi-bin/mt-admin/mt-comts.cgi" name="comments_form" onsubmit="if (this.bakecookie.checked) rememberMe(this)">
+                           <input type="hidden" name="static" value="1" />
+                           <input type="hidden" name="entry_id" value="1526" />
+                           
+                           <div class="comments-open" id="comments-open">
+                              <h2 class="comments-open-header">コメントを投稿</h2>
+                              
+                              <div class="comments-open-content">
+                                 <script type="text/javascript">
+                                 <!--
+                                 writeTypeKeyGreeting(commenter_name, 1526);
+                                 //-->
+                                 </script>
+                              
+                                 
+
+                                 <div id="comments-open-data">
+                                    <div id="name-email">
+                                       <p>
+                                          <label for="comment-author">名前:</label>
+                                          <input id="comment-author" name="author" size="30" />
+                                       </p>
+                                       <p>
+                                          <label for="comment-email">メールアドレス:</label>
+                                          <input id="comment-email" name="email" size="30" />
+                                       </p>
+                                    </div>
+
+                                    <p>
+                                       <label for="comment-url">URL:</label>
+                                       <input id="comment-url" name="url" size="30" />
+                                    </p>
+                                    <p>
+                                       <label for="comment-bake-cookie"><input type="checkbox"
+                                          id="comment-bake-cookie" name="bakecookie" onclick="if (!this.checked) forgetMe(document.comments_form)" value="1" />
+                                          この情報を登録しますか?</label>
+                                    </p>
+                                 </div>
+
+                                 <p id="comments-open-text">
+                                    <label for="comment-text">コメント: (スタイル用のHTMLタグが使えます)</label>
+                                    <textarea id="comment-text" name="text" rows="15" cols="50"></textarea>
+                                 </p>
+                                 <div id="comments-open-footer" class="comments-open-footer">
+                                    <input type="submit" accesskey="v" name="preview" id="comment-preview" value="確認" />
+                                    <input type="submit" accesskey="s" name="post" id="comment-post" value="投稿" />
+                                 </div>
+                              </div>
+                           </div>
+                        </form>
+                        
+                     </div>
+                     
+                  </div>
+               </div>
+               <div id="beta">
+                  <div id="beta-inner" class="pkg">
+
+<!--
+<div class="module">
+<h2 class="module-header"><a href="http://ivoca.31tools.com/">英語ゲーム iVoca</a></h2>
+<script src='http://ivoca.31tools.com/widget?id=93&size=176' type='text/javascript'></script>
+</div>
+-->
+<div class="module">
+<script type='text/javascript' src='http://flowr.31tools.com/flowr.js?height=170&style=green'></script>
+</div>
+                      <div class="module-search module">
+                         <h2 class="module-header">検索</h2>
+                         <div class="module-content">
+                            <form method="get" action="http://labs.cybozu.co.jp/cgi-bin/mt-admin/mt-search.cgi">
+                               <input type="hidden" name="IncludeBlogs" value="13" />
+                               <label for="search" accesskey="4">ブログを検索: </label><br />
+                               <input id="search" name="search" size="20" />
+                               <input type="submit" value="検索" />
+                            </form>
+                         </div>
+                      </div>
+
+                     <div class="module-archives module">
+                        <h2 class="module-header">最近のエントリー</h2>
+                        <div class="module-content">
+                           <ul class="module-list">
+                                                         <li class="module-list-item"><a href="http://labs.cybozu.co.jp/blog/nakatani/2009/04/perceptron_1.html">Perceptron を手で計算して理解してみる</a></li>
+                                                         <li class="module-list-item"><a href="http://labs.cybozu.co.jp/blog/nakatani/2009/04/perceptron.html">Perceptron を勉強する前にオンライン機械学習ライブラリを試してみる</a></li>
+                                                         <li class="module-list-item"><a href="http://labs.cybozu.co.jp/blog/nakatani/2009/04/_ivoca_3.html">英単語タイピングゲーム iVoca を機能アップデートしました</a></li>
+                                                         <li class="module-list-item"><a href="http://labs.cybozu.co.jp/blog/nakatani/2009/03/hac_feature_selection.html">HAC に使える feature selection を試す</a></li>
+                                                         <li class="module-list-item"><a href="http://labs.cybozu.co.jp/blog/nakatani/2009/02/_ivoca_2.html">英単語タイピングゲーム iVoca をアップデートしました</a></li>
+                                                         <li class="module-list-item"><a href="http://labs.cybozu.co.jp/blog/nakatani/2009/02/ivoca_4.html">iVoca メンテナンスのお知らせ</a></li>
+                                                         <li class="module-list-item"><a href="http://labs.cybozu.co.jp/blog/nakatani/2009/02/iir_1.html">IIR の「効果的な」階層的クラスタリング</a></li>
+                                                         <li class="module-list-item"><a href="http://labs.cybozu.co.jp/blog/nakatani/2009/01/iir.html">IIR の階層的クラスタリングを試す</a></li>
+                                                         <li class="module-list-item"><a href="http://labs.cybozu.co.jp/blog/nakatani/2008/12/ivoca_3.html">iVoca が日本語(ローマ字入力)に対応、なんでも暗記サービスになります！</a></li>
+                                                         <li class="module-list-item"><a href="http://labs.cybozu.co.jp/blog/nakatani/2008/11/ivoca_yahoo_rss.html">iVoca が Yahoo! ブログへの貼り付けに対応しました＆RSS＆苦手単語ランキング</a></li>
+                           
+                           </ul>
+                           <a href="http://labs.cybozu.co.jp/blog/nakatani/atom.xml">このブログのフィードを取得</a><br />
+                           [<a href="http://www.sixapart.jp/about/feeds">フィードとは</a>]
+                        </div>
+                     </div>
+
+
+<div class="link module">
+<h2 class="module-header">リンク</h2>
+<div class="module-content">
+<ul class="module-list">
+<li class="module-list-item"><a href="http://ivoca.31tools.com/">英単語ゲーム iVoca</a></li>
+<li class="module-list-item"><a href="http://flowr.31tools.com/">flowr</a></li>
+<li class="module-list-item"><a href="http://coderepos.org/share/wiki/JSRuby">JSRuby</a></li>
+<li class="module-list-item"><a href="http://d.hatena.ne.jp/n_shuyo/" rel="me">個人ブログ</a></li>
+<hr style="margin:5px;"/>
+<li class="module-list-item"><a href="http://labs.cybozu.co.jp/">サイボウズ・ラボ</a></li>
+</ul>
+</div>
+</div>
+
+                  </div>
+               </div>
+
+<script type="text/javascript"><!--
+google_ad_client = "pub-7980140096856967";
+google_ad_slot = "1443044348";
+google_ad_width = 125;
+google_ad_height = 125;
+//-->
+</script>
+<script type="text/javascript"
+src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script> 
+
+            </div>
+         </div>
+      </div>
+   </div>
+</body>
+</html>

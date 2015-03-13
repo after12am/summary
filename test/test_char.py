@@ -1,16 +1,7 @@
 import unittest
 from summary.char import *
 
-class TestDecodeEntities(unittest.TestCase):
-    
-    def setUp(self):
-        self.entities = 'A &#039;quote&#039; is &lt;b&gt;bold&lt;/b&gt;'
-
-    def test_decode_entities(self):
-        decoded = decode_entities(self.entities)
-        self.assertEqual(decoded, "A 'quote' is <b>bold</b>")
-
-encoding_located_in_charset = '''
+encoding_located_in_charset = u'''
 <!DOCTYPE HTML>
 <html lang="en">
 <head>
@@ -22,7 +13,7 @@ encoding_located_in_charset = '''
 </html>
 '''
 
-encoding_located_in_content = '''
+encoding_located_in_content = u'''
 <!DOCTYPE HTML>
 <html lang="en">
 <head>
@@ -34,11 +25,11 @@ encoding_located_in_content = '''
 </html>
 '''
 
-encoding_text_format = '''
+encoding_text_format = u'''
 Not HTML document
 '''
 
-encoding_not_specified = '''
+encoding_not_specified = u'''
 <!DOCTYPE HTML>
 <html lang="en">
 <head>
@@ -48,6 +39,17 @@ encoding_not_specified = '''
 </body>
 </html>
 '''
+
+
+class TestDecodeEntities(unittest.TestCase):
+    
+    def setUp(self):
+        self.entities = 'A &#039;quote&#039; is &lt;b&gt;bold&lt;/b&gt;'
+
+    def test_decode_entities(self):
+        decoded = decode_entities(self.entities)
+        self.assertEqual(decoded, "A 'quote' is <b>bold</b>")
+
 
 class TestDetectEncoding(unittest.TestCase):
     

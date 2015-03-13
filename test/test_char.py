@@ -1,7 +1,7 @@
 import unittest
 from summary.char import *
 
-encoding_located_in_charset = u'''
+encoding_located_in_charset = '''
 <!DOCTYPE HTML>
 <html lang="en">
 <head>
@@ -13,7 +13,7 @@ encoding_located_in_charset = u'''
 </html>
 '''
 
-encoding_located_in_content = u'''
+encoding_located_in_content = '''
 <!DOCTYPE HTML>
 <html lang="en">
 <head>
@@ -25,11 +25,11 @@ encoding_located_in_content = u'''
 </html>
 '''
 
-encoding_text_format = u'''
+encoding_text_format = '''
 Not HTML document
 '''
 
-encoding_not_specified = u'''
+encoding_not_specified = '''
 <!DOCTYPE HTML>
 <html lang="en">
 <head>

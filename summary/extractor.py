@@ -44,6 +44,10 @@ class Article(object):
         self.continuous_factor = 1.62
         self.decay_factor = .93
     
+    def __getitem__(self, attr):
+        print "FutureWarning: This access method will change in future versions. Use 'instance.%s' instead." % attr
+        return getattr(self, attr)
+    
     # extracting title of main content
     @property
     def title(self):

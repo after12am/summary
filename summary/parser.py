@@ -15,14 +15,17 @@ def decompose(body):
         if m:
             _m = re.compile(r'h[1-6]', re.DOTALL).match(m)
         if _m:
+            # <h[1-6]>
             if hx == u'':
                 hx = u'<%s>' % _m.group()
             else:
                 match.append(hx + u'</%s>' % _m.group())
                 hx = u''
         elif hx:
+            # </h[1-6]>
             hx += m
         else:
+            # <div.*?>|</div>
             match.append(m)
     sects = []
     for m in match:

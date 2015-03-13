@@ -4,6 +4,7 @@ import defs
 import parser
 import cluster
 import urllib, urllib2
+import digest
 from cluster import lbttlscore
 from lxml.html import fromstring, tostring
 from html import text_content
@@ -32,61 +33,72 @@ def extract_normed_body(html):
     return to_unicode(tostring(dom.body))
 
 
-# extracting title of main content
-def extract_guessed_title(html, continuous_factor = 1.62, decay_factor = .93):
-    sects = parser.decompose(extract_normed_body(html))
-    clusts = cluster.lbcluster(sects)
-    # sorting cluster by their score
-    clusts.sort(cmp=lambda a,b: cmp(b.points, a.points))
-    # calcurate high score cluster
-    best = clusts[0]
-    if len(best.blocks) == 0:
+class Article(object):
+    
+    def __init__(self, html, config = {}):
+        self.html = html
+        self.continuous_factor = 1.62
+        self.decay_factor = .93
+    
+    # extracting title of main content
+    @property
+    def title(self):
+        sects = parser.decompose(extract_normed_body(self.html))
+        clusts = cluster.lbcluster(sects)
+        # sorting cluster by their score
+        clusts.sort(cmp=lambda a,b: cmp(b.points, a.points))
+        # calcurate high score cluster
+        best = clusts[0]
+        if len(best.blocks) == 0:
+            return False
+        factor = 1.0
+        continuous = 1.0
+        bestmatch = [u'', 0]
+        items = sects[:sects.index(best.blocks[0])]
+        items.reverse()
+        for b in items:
+            if len(bestmatch[0]) > 0:
+                continuous /= self.continuous_factor
+            if len(b.text) == 0:
+                continue
+            factor *= self.decay_factor
+            if lbttlscore(b, factor) * continuous > bestmatch[1]:
+                bestmatch[0]  = b.text
+                bestmatch[1] = lbttlscore(b, factor) * continuous
+        return bestmatch[0]
+    
+    # extracting main content with tags
+    @property
+    def content(self):
+        sects = parser.decompose(extract_normed_body(self.html))
+        clusts = cluster.lbcluster(sects)
+        # sorting cluster by their score
+        clusts.sort(cmp=lambda a,b: cmp(b.points, a.points))
+        best = clusts[0]
+        if len(best.body) > 0:
+            return decode_entities(best.body)
         return False
-    factor = 1.0
-    continuous = 1.0
-    bestmatch = [u'', 0]
-    items = sects[:sects.index(best.blocks[0])]
-    items.reverse()
-    for b in items:
-        if len(bestmatch[0]) > 0:
-            continuous /= continuous_factor
-        if len(b.text) == 0:
-            continue
-        factor *= decay_factor
-        if lbttlscore(b, factor) * continuous > bestmatch[1]:
-            bestmatch[0]  = b.text
-            bestmatch[1] = lbttlscore(b, factor) * continuous
-    return bestmatch[0]
-
-
-# extracting main content with tags
-def extract_guessed_content(html):
-    sects = parser.decompose(extract_normed_body(html))
-    clusts = cluster.lbcluster(sects)
-    # sorting cluster by their score
-    clusts.sort(cmp=lambda a,b: cmp(b.points, a.points))
-    best = clusts[0]
-    if len(best.body) > 0:
-        return decode_entities(best.body)
-    return False
-
-
-# extracting main content without tags
-def extract_guessed_text(html):
-    content = extract_guessed_content()
-    if type(content) == unicode and len(content) > 0:
-        return text_content(content)
-    return False
-
-
-# extracting summarization of content
-def extract_guessed_digest(html):
-    pass
-
-
-# extracting content images
-def extract_guessed_images(html):
-    pass
+    
+    # extracting main content without tags
+    @property
+    def text(self):
+        content = self.content
+        if type(content) == unicode and len(content) > 0:
+            return text_content(content)
+        return False
+    
+    # extracting summarization of content
+    @property
+    def digest(self):
+        summarized = digest.summarize(self.text)
+        return ''.join(summarized['top_n_summary'])
+    
+    # extracting content images
+    @property
+    def images(self):
+        content = self.content
+        data = fromstring(content)
+        return [item.attrib for item in data.xpath('//img')]
 
 
 # function for fetching URLs for many schemes using a variety of different protocols.
@@ -112,5 +124,5 @@ def extract(html = None, uri = None, config = {}):
             print 'Error code: ', e.code
             print 'Reason: ', e.reason
             return False
-    return data
+    return Article(data)
 

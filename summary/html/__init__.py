@@ -10,6 +10,8 @@ def text_content(html):
             return unicode(dom.text_content().strip())
     except ParserError, e:
         # asserted in case of being “</nav>” content
-        return u''
+        pass
     except XMLSyntaxError, e:
-        return u''
+        pass
+    return u''
+

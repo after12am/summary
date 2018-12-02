@@ -6,13 +6,13 @@ from summary.extractor import extract
 _abspath = os.path.abspath(os.path.dirname(__file__))
 
 uri_en = {
-    "music_visualizer_progress": "file:%s/resources/html/en/music-visualizer-progress.html" % _abspath,
-    "abstrakt_abstrakt_jorinde_voigt": "file:%s/resources/html/en/abstrakt-abstrakt-jorinde-voigt.html" % _abspath
+    "music_visualizer_progress": "file:%s/resources/html/en/music-visualizer-progress.html.txt" % _abspath,
+    "abstrakt_abstrakt_jorinde_voigt": "file:%s/resources/html/en/abstrakt-abstrakt-jorinde-voigt.html.txt" % _abspath
 }
 
 uri_ja = {
-    "post_10869": "file:%s/resources/html/ja/post_10869.html" % _abspath,
-    "nakatani_web_1": "file:%s/resources/html/ja/nakatani_web_1.html" % _abspath
+    "post_10869": "file:%s/resources/html/ja/post_10869.html.txt" % _abspath,
+    "nakatani_web_1": "file:%s/resources/html/ja/nakatani_web_1.html.txt" % _abspath
 }
 
 
